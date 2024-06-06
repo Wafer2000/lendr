@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "65158076811",
+    "project_id": "lendr-26e5c",
+    "storage_bucket": "lendr-26e5c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:65158076811:android:a2f907f0e2df0dca0d778e",
+        "android_client_info": {
+          "package_name": "com.example.lendr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3dLIV_2IqDZwXSzyyyGu2ThyJTRkCUU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
