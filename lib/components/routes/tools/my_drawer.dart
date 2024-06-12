@@ -6,6 +6,7 @@ import 'package:lendr/components/routes/log/login.dart';
 import 'package:lendr/components/routes/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/views/completed_loans.dart';
 import 'package:lendr/components/routes/views/customers.dart';
+import 'package:lendr/components/routes/views/debt_collector.dart';
 import 'package:lendr/components/routes/views/late_payments.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/components/routes/views/profile.dart';
@@ -47,7 +48,7 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -116,6 +117,20 @@ class _MyDrawerState extends State<MyDrawer> {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, Customers.routname);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.credit_card,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                  ),
+                  title: const Text('C O B R A D O R E S'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, DebtCollector.routname);
                   },
                 ),
               ),

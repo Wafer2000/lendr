@@ -35,7 +35,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
               Icons.list,
               color: Theme.of(context).primaryColor,
             ),
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             content: StreamBuilder<QuerySnapshot>(
@@ -57,7 +57,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
                   }
                   if (snapshot.data == null) {
                     return Scaffold(
-                      backgroundColor: Theme.of(context).colorScheme.background,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       body: const Stack(
                         children: [
                           Positioned.fill(
@@ -87,7 +87,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
                             width: 150,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               boxShadow: [
                                 BoxShadow(
                                   color: Theme.of(context).brightness ==
@@ -378,7 +378,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
               : MyColor.capeCod().color,
         ),
         drawer: const MyDrawer(),
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: Column(
           children: [
             StreamBuilder<DocumentSnapshot>(

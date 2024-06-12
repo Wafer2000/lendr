@@ -13,15 +13,15 @@ import 'package:lendr/firebase/firestore.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';
 
-class Customers extends StatefulWidget {
-  static const String routname = '/customers';
-  const Customers({super.key});
+class DebtCollector extends StatefulWidget {
+  static const String routname = '/debt_collector';
+  const DebtCollector({super.key});
 
   @override
-  State<Customers> createState() => _CustomersState();
+  State<DebtCollector> createState() => _DebtCollectorState();
 }
 
-class _CustomersState extends State<Customers> {
+class _DebtCollectorState extends State<DebtCollector> {
   final TextEditingController firstnameController = TextEditingController();
   final TextEditingController middlenameController = TextEditingController();
   final TextEditingController lastnameController = TextEditingController();
@@ -41,7 +41,7 @@ class _CustomersState extends State<Customers> {
     super.dispose();
   }
 
-  void KeepClient() async {
+  void KeepDebtCollector() async {
     LoadingScreen().show(context);
 
     final now = DateTime.now();
@@ -84,7 +84,7 @@ class _CustomersState extends State<Customers> {
     } else if (doc.exists) {
       LoadingScreen().hide();
       displayMessageToUser(
-          'Este Cliente ya existe en la Base de Datos', context);
+          'Este DebtCollectore ya existe en la Base de Datos', context);
     } else {
       FirebaseFirestore.instance
           .collection('Cobradores+${_pref.uid}')
@@ -108,12 +108,12 @@ class _CustomersState extends State<Customers> {
         'amount': 0,
         'debts': 0
       });
-      displayMessageToUser('Cliente guardado', context);
+      displayMessageToUser('DebtCollectore guardado', context);
       LoadingScreen().hide();
     }
   }
 
-  void new_client() {
+  void new_DebtCollector() {
     showDialog(
       context: context,
       builder: (context) {
@@ -267,7 +267,7 @@ class _CustomersState extends State<Customers> {
                   ),
                   child: TextButton(
                     onPressed: () async {
-                      KeepClient();
+                      KeepDebtCollector();
                       Navigator.pop(context);
                     },
                     child: Text('Guardar',
@@ -287,7 +287,7 @@ class _CustomersState extends State<Customers> {
     );
   }
 
-  void edit_client(id) {
+  void edit_DebtCollector(id) {
     showDialog(
       context: context,
       builder: (context) {
@@ -311,30 +311,30 @@ class _CustomersState extends State<Customers> {
                 return const Text('No hay datos');
               }
 
-              final client = snapshot.data!;
+              final DebtCollector = snapshot.data!;
 
               final TextEditingController firstnameController =
-                  TextEditingController(text: client['firstname']);
+                  TextEditingController(text: DebtCollector['firstname']);
               final TextEditingController middlenameController =
-                  TextEditingController(text: client['middlename']);
+                  TextEditingController(text: DebtCollector['middlename']);
               final TextEditingController lastnameController =
-                  TextEditingController(text: client['lastname']);
+                  TextEditingController(text: DebtCollector['lastname']);
               final TextEditingController secondlastnameController =
-                  TextEditingController(text: client['secondlastname']);
+                  TextEditingController(text: DebtCollector['secondlastname']);
               final TextEditingController emailController =
-                  TextEditingController(text: client['email']);
+                  TextEditingController(text: DebtCollector['email']);
               final TextEditingController phoneController =
-                  TextEditingController(text: client['phone'].toString());
+                  TextEditingController(text: DebtCollector['phone'].toString());
               final TextEditingController dniController =
-                  TextEditingController(text: client['dni'].toString());
+                  TextEditingController(text: DebtCollector['dni'].toString());
               final TextEditingController workController =
-                  TextEditingController(text: client['work']);
+                  TextEditingController(text: DebtCollector['work']);
               final TextEditingController addressController =
-                  TextEditingController(text: client['address']);
+                  TextEditingController(text: DebtCollector['address']);
               final TextEditingController cityController =
-                  TextEditingController(text: client['city']);
+                  TextEditingController(text: DebtCollector['city']);
               final TextEditingController regionController =
-                  TextEditingController(text: client['region']);
+                  TextEditingController(text: DebtCollector['region']);
               return AlertDialog(
                 title: const Text('Llene todos los campos'),
                 icon: const Icon(Icons.group),
@@ -545,7 +545,7 @@ class _CustomersState extends State<Customers> {
                                 'lendr': _pref.uid
                               });
                               Navigator.pop(context);
-                              displayMessageToUser('Cliente editado', context);
+                              displayMessageToUser('DebtCollectore editado', context);
                               LoadingScreen().hide();
                             }
                           },
@@ -567,24 +567,24 @@ class _CustomersState extends State<Customers> {
     );
   }
 
-  void EliminateClient(id) async {
+  void EliminateDebtCollector(id) async {
     LoadingScreen().show(context);
 
     FirebaseFirestore.instance
         .collection('Cobradores+${_pref.uid}')
         .doc(id)
         .delete();
-    displayMessageToUser('Cliente Eliminado', context);
+    displayMessageToUser('DebtCollectore Eliminado', context);
     LoadingScreen().hide();
     Navigator.pop(context);
   }
 
-  void delete_client(id) {
+  void delete_DebtCollector(id) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('¿Deseas eliminar este Cliente?'),
+          title: const Text('¿Deseas eliminar este DebtCollectore?'),
           icon: const Icon(Icons.delete),
           shadowColor: Theme.of(context).primaryColor,
           shape:
@@ -602,7 +602,7 @@ class _CustomersState extends State<Customers> {
                       children: [
                         Flexible(
                           child: Text(
-                            'Se borara todo dato relacionado con el cliente.',
+                            'Se borara todo dato relacionado con el DebtCollectore.',
                             style: TextStyle(
                               fontSize: 20,
                               color: Theme.of(context).brightness ==
@@ -657,7 +657,7 @@ class _CustomersState extends State<Customers> {
                   ),
                   child: TextButton(
                     onPressed: () async {
-                      EliminateClient(id);
+                      EliminateDebtCollector(id);
                       Navigator.pop(context);
                     },
                     child: Text('Eliminar',
@@ -682,7 +682,7 @@ class _CustomersState extends State<Customers> {
     final collections = GetCollectionsLoan();
 
     return StreamBuilder<QuerySnapshot>(
-        stream: collections.getCollections(_pref.uid, 'Clientes'),
+        stream: collections.getCollections(_pref.uid, 'Cobradores'),
         builder: (context, snapshot) {
           final service = snapshot.data?.docs;
 
@@ -697,12 +697,12 @@ class _CustomersState extends State<Customers> {
             return Scaffold(
               appBar: AppBar(
                 elevation: 0,
-                title: const Center(child: Text('C o b r a d o r e s')),
+                title: const Center(child: Text('C l i e n t e s')),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      new_client();
+                      new_DebtCollector();
                     },
                     tooltip: 'Add',
                     alignment: Alignment.center,
@@ -737,7 +737,7 @@ class _CustomersState extends State<Customers> {
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    new_client();
+                    new_DebtCollector();
                   },
                   tooltip: 'Add',
                   alignment: Alignment.center,
@@ -968,7 +968,7 @@ class _CustomersState extends State<Customers> {
                                   IconButton(
                                     icon: const Icon(Icons.edit),
                                     onPressed: () {
-                                      edit_client(docID);
+                                      edit_DebtCollector(docID);
                                     },
                                     iconSize: 35,
                                     tooltip: 'Editar',
@@ -989,7 +989,7 @@ class _CustomersState extends State<Customers> {
                                   IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {
-                                      delete_client(docID);
+                                      delete_DebtCollector(docID);
                                     },
                                     iconSize: 35,
                                     tooltip: 'Editar',

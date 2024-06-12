@@ -5,6 +5,7 @@ import 'package:lendr/components/routes/log/login.dart';
 import 'package:lendr/components/routes/log/register.dart';
 import 'package:lendr/components/routes/views/completed_loans.dart';
 import 'package:lendr/components/routes/views/customer_debts.dart';
+import 'package:lendr/components/routes/views/debt_collector.dart';
 import 'package:lendr/components/routes/views/late_payments.dart';
 import 'package:lendr/components/routes/views/services/new_loan.dart';
 import 'package:lendr/components/routes/views/customers.dart';
@@ -39,6 +40,7 @@ class _RoutesState extends State<Routes> {
         Register.routname: (context) => const Register(),
         ExtraData.routname: (context) => const ExtraData(),
         Customers.routname: (context) => const Customers(),
+        DebtCollector.routname: (context) => const DebtCollector(),
         LatePayments.routname: (context) => const LatePayments(),
         CustomerDebts.routname: (context) => const CustomerDebts(),
         CompletedLoans.routname: (context) => const CompletedLoans(),

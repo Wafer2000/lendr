@@ -39,7 +39,7 @@ class _CustomerDebtsState extends State<CustomerDebts> {
               Icons.list,
               color: Theme.of(context).primaryColor,
             ),
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             content: StreamBuilder<QuerySnapshot>(
@@ -61,7 +61,7 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                   }
                   if (snapshot.data == null) {
                     return Scaffold(
-                      backgroundColor: Theme.of(context).colorScheme.background,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       body: const Stack(
                         children: [
                           Positioned.fill(
@@ -91,7 +91,7 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                             width: 150,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               boxShadow: [
                                 BoxShadow(
                                   color: Theme.of(context).brightness ==

@@ -42,7 +42,7 @@ class _ProfileState extends State<Profile> {
               : MyColor.capeCod().color,
         ),
         drawer: const MyDrawer(),
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
               .collection('Users')
@@ -134,7 +134,7 @@ class _ProfileState extends State<Profile> {
                         height: 25,
                       ),
                       Text(
-                        '${user['nombres'].split(' ')[0]} ${user['apellidos'].split(' ')[0]}',
+                        '${user['firstname']} ${user['lastname']}',
                         style: const TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),

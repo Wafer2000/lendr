@@ -21,7 +21,10 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final TextEditingController firstnameController = TextEditingController();
+  final TextEditingController middlenameController = TextEditingController();
   final TextEditingController lastnameController = TextEditingController();
+  final TextEditingController secondlastnameController =
+      TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPassController = TextEditingController();
@@ -64,8 +67,10 @@ class _RegisterState extends State<Register> {
         pref.uid = uid!;
         FirebaseFirestore.instance.collection('Users').doc(uid).set({
           'uid': uid,
-          'nombres': firstnameController.text,
-          'apellidos': lastnameController.text,
+          'firstname': firstnameController.text,
+          'middlename': middlenameController.text,
+          'lastname': lastnameController.text,
+          'secondlastname': secondlastnameController.text,
           'email': emailController.text,
           'password': passwordController.text,
           'fnacimiento': '',
@@ -104,7 +109,7 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(25, 25, 25, 0),
@@ -124,40 +129,78 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
                 ),
-                MyTextField(
-                    labelText: 'Nombres',
-                    obscureText: false,
-                    controller: firstnameController),
-                const SizedBox(
-                  height: 10,
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: MyTextField(
+                        labelText: 'Primer Nombre',
+                        obscureText: false,
+                        controller: firstnameController,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: MyTextField(
+                        labelText: 'Segundo Nombre',
+                        obscureText: false,
+                        controller: middlenameController,
+                      ),
+                    ),
+                  ],
                 ),
-                MyTextField(
-                    labelText: 'Apellidos',
-                    obscureText: false,
-                    controller: lastnameController),
                 const SizedBox(
-                  height: 10,
+                  height: 5,
+                ),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: MyTextField(
+                        labelText: 'Primer Apellido',
+                        obscureText: false,
+                        controller: lastnameController,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: MyTextField(
+                        labelText: 'Segundo Apellido',
+                        obscureText: false,
+                        controller: secondlastnameController,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 5,
                 ),
                 MyTextField(
                     labelText: 'Correo',
                     obscureText: false,
                     controller: emailController),
                 const SizedBox(
-                  height: 10,
+                  height: 5,
                 ),
                 MyTextField(
                     labelText: 'Contraseña',
                     obscureText: true,
                     controller: passwordController),
                 const SizedBox(
-                  height: 10,
+                  height: 5,
                 ),
                 MyTextField(
                     labelText: 'Confirmar Contraseña',
                     obscureText: true,
                     controller: confirmPassController),
                 const SizedBox(
-                  height: 10,
+                  height: 5,
                 ),
                 MyButton(text: 'Registrar', onTap: () => Registro()),
                 const SizedBox(

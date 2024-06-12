@@ -8,6 +8,7 @@ import 'package:lendr/components/routes/tools/helper_functions.dart';
 import 'package:lendr/components/routes/tools/input_photo.dart';
 import 'package:lendr/components/routes/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/tools/my_button.dart';
+import 'package:lendr/components/routes/tools/my_numberfield.dart';
 import 'package:lendr/components/routes/tools/my_textfield.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/shared/prefe_users.dart';
@@ -26,7 +27,7 @@ class _ExtraDataState extends State<ExtraData> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('Users')
@@ -143,7 +144,7 @@ class _ExtraDataState extends State<ExtraData> {
                     const SizedBox(
                       height: 10,
                     ),
-                    MyTextField(
+                    MyNumberField(
                         labelText: 'Numero Celular',
                         obscureText: false,
                         controller: phoneController),
@@ -185,7 +186,7 @@ class _ExtraDataState extends State<ExtraData> {
                                       Brightness.light
                                   ? ThemeData.light().copyWith(
                                       colorScheme: ColorScheme.light(
-                                        background: Colors.grey.shade300,
+                                        surface: Colors.grey.shade300,
                                         primary: Colors.grey.shade500,
                                         secondary: Colors.grey.shade400,
                                         inversePrimary: Colors.grey.shade500,
@@ -193,7 +194,7 @@ class _ExtraDataState extends State<ExtraData> {
                                     )
                                   : ThemeData.dark().copyWith(
                                       colorScheme: ColorScheme.dark(
-                                        background: Colors.grey.shade300,
+                                        surface: Colors.grey.shade800,
                                         primary: Colors.grey.shade500,
                                         secondary: Colors.grey.shade400,
                                         inversePrimary: Colors.grey.shade500,
