@@ -59,6 +59,8 @@ class _ExtraDataState extends State<ExtraData> {
               TextEditingController(text: user['celular']);
           final TextEditingController ageController =
               TextEditingController(text: user['fnacimiento']);
+          final TextEditingController balanceController =
+              TextEditingController(text: user['balance'].toString());
 
           void Guardar() async {
             LoadingScreen().show(context);
@@ -87,6 +89,13 @@ class _ExtraDataState extends State<ExtraData> {
                   'fperfil': fotoPerfilController.text,
                   'sexo': sexController.text,
                   'direccion': addressController.text,
+                  'balance': int.parse(balanceController.text),
+                });
+                FirebaseFirestore.instance
+                    .collection('Prestamos+${_pref.uid}')
+                    .doc('General')
+                    .update({
+                  'balance': int.parse(balanceController.text),
                 });
                 LoadingScreen().hide();
                 Navigator.pushReplacement(
@@ -148,6 +157,13 @@ class _ExtraDataState extends State<ExtraData> {
                         labelText: 'Numero Celular',
                         obscureText: false,
                         controller: phoneController),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    MyNumberField(
+                        labelText: 'Saldo',
+                        obscureText: false,
+                        controller: balanceController),
                     const SizedBox(
                       height: 10,
                     ),

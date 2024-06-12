@@ -30,7 +30,6 @@ class _DebtCollectorState extends State<DebtCollector> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController dniController = TextEditingController();
-  final TextEditingController workController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
   final TextEditingController regionController = TextEditingController();
@@ -59,18 +58,12 @@ class _DebtCollectorState extends State<DebtCollector> {
     } else if (lastnameController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar los dos apellidos', context);
-    } else if (emailController.text == '') {
-      LoadingScreen().hide();
-      displayMessageToUser('Debe colocar el email', context);
     } else if (phoneController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar el celular', context);
     } else if (dniController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar la cedula', context);
-    } else if (workController.text == '') {
-      LoadingScreen().hide();
-      displayMessageToUser('Debe colocar el tipo de trabajo', context);
     } else if (addressController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar la direccion', context);
@@ -97,7 +90,6 @@ class _DebtCollectorState extends State<DebtCollector> {
         'email': emailController.text,
         'phone': int.parse(phoneController.text),
         'dni': int.parse(dniController.text),
-        'work': workController.text,
         'address': addressController.text,
         'city': cityController.text,
         'region': regionController.text,
@@ -106,9 +98,9 @@ class _DebtCollectorState extends State<DebtCollector> {
         'lendr': _pref.uid,
         'collect': 0,
         'amount': 0,
-        'debts': 0
+        'loans': 0
       });
-      displayMessageToUser('DebtCollectore guardado', context);
+      displayMessageToUser('Cobrador Guardado', context);
       LoadingScreen().hide();
     }
   }
@@ -186,14 +178,6 @@ class _DebtCollectorState extends State<DebtCollector> {
                     height: 10,
                   ),
                   MyTextField(
-                    labelText: 'Trabajo',
-                    obscureText: false,
-                    controller: workController,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  MyTextField(
                     labelText: 'Direccion',
                     obscureText: false,
                     controller: addressController,
@@ -243,7 +227,6 @@ class _DebtCollectorState extends State<DebtCollector> {
                       emailController.clear();
                       phoneController.clear();
                       dniController.clear();
-                      workController.clear();
                       addressController.clear();
                       cityController.clear();
                       regionController.clear();
@@ -324,11 +307,10 @@ class _DebtCollectorState extends State<DebtCollector> {
               final TextEditingController emailController =
                   TextEditingController(text: DebtCollector['email']);
               final TextEditingController phoneController =
-                  TextEditingController(text: DebtCollector['phone'].toString());
+                  TextEditingController(
+                      text: DebtCollector['phone'].toString());
               final TextEditingController dniController =
                   TextEditingController(text: DebtCollector['dni'].toString());
-              final TextEditingController workController =
-                  TextEditingController(text: DebtCollector['work']);
               final TextEditingController addressController =
                   TextEditingController(text: DebtCollector['address']);
               final TextEditingController cityController =
@@ -387,7 +369,7 @@ class _DebtCollectorState extends State<DebtCollector> {
                         const SizedBox(
                           height: 10,
                         ),
-                        MyTextField(
+                        MyNumberField(
                           labelText: 'Celular',
                           obscureText: false,
                           controller: phoneController,
@@ -395,18 +377,13 @@ class _DebtCollectorState extends State<DebtCollector> {
                         const SizedBox(
                           height: 10,
                         ),
-                        MyTextField(
+                        MyNumberField(
                           labelText: 'Cedula',
                           obscureText: false,
                           controller: dniController,
                         ),
                         const SizedBox(
                           height: 10,
-                        ),
-                        MyTextField(
-                          labelText: 'Trabajo',
-                          obscureText: false,
-                          controller: workController,
                         ),
                         const SizedBox(
                           height: 10,
@@ -462,7 +439,6 @@ class _DebtCollectorState extends State<DebtCollector> {
                             emailController.clear();
                             phoneController.clear();
                             dniController.clear();
-                            workController.clear();
                             addressController.clear();
                             cityController.clear();
                             regionController.clear();
@@ -508,10 +484,6 @@ class _DebtCollectorState extends State<DebtCollector> {
                               LoadingScreen().hide();
                               displayMessageToUser(
                                   'Debe colocar la cedula', context);
-                            } else if (workController.text == '') {
-                              LoadingScreen().hide();
-                              displayMessageToUser(
-                                  'Debe colocar el tipo de trabajo', context);
                             } else if (addressController.text == '') {
                               LoadingScreen().hide();
                               displayMessageToUser(
@@ -538,14 +510,14 @@ class _DebtCollectorState extends State<DebtCollector> {
                                 'email': emailController.text,
                                 'phone': int.parse(phoneController.text),
                                 'dni': int.parse(dniController.text),
-                                'work': workController.text,
                                 'address': addressController.text,
                                 'city': cityController.text,
                                 'region': regionController.text,
                                 'lendr': _pref.uid
                               });
                               Navigator.pop(context);
-                              displayMessageToUser('DebtCollectore editado', context);
+                              displayMessageToUser(
+                                  'DebtCollectore editado', context);
                               LoadingScreen().hide();
                             }
                           },
@@ -697,7 +669,7 @@ class _DebtCollectorState extends State<DebtCollector> {
             return Scaffold(
               appBar: AppBar(
                 elevation: 0,
-                title: const Center(child: Text('C l i e n t e s')),
+                title: const Center(child: Text('C o b r a d o r e s')),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.add),
@@ -824,7 +796,7 @@ class _DebtCollectorState extends State<DebtCollector> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Deudas: ',
+                                                'Prestamos: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 20,
@@ -837,10 +809,7 @@ class _DebtCollectorState extends State<DebtCollector> {
                                                 textAlign: TextAlign.left,
                                               ),
                                               Text(
-                                                NumberFormat.currency(
-                                                        locale: 'es',
-                                                        symbol: '\$')
-                                                    .format(data['debts']),
+                                                data['loans'].toString(),
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                   color: Theme.of(context)
@@ -861,7 +830,7 @@ class _DebtCollectorState extends State<DebtCollector> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Dinero Pedido: ',
+                                                'Dinero Prestado: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 20,
@@ -897,7 +866,7 @@ class _DebtCollectorState extends State<DebtCollector> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Dinero por pagar: ',
+                                                'Dinero por cobrar: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 20,

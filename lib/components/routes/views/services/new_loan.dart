@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:lendr/components/routes/tools/helper_functions.dart';
 import 'package:lendr/components/routes/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/tools/my_button.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/components/routes/tools/my_numberfield.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';
@@ -21,6 +21,7 @@ class NewLoan extends StatefulWidget {
 
 class _NewLoanState extends State<NewLoan> {
   final TextEditingController clientController = TextEditingController();
+  final TextEditingController workerController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController percentageController = TextEditingController();
   final TextEditingController tipePayController = TextEditingController();
@@ -30,6 +31,7 @@ class _NewLoanState extends State<NewLoan> {
   final TextEditingController hourController = TextEditingController();
 
   String clientId = '';
+  String workerId = '';
   List<String>? _dropDownItems = [];
   final _pref = PreferencesUser();
 
@@ -63,11 +65,14 @@ class _NewLoanState extends State<NewLoan> {
       case 'Semanal':
         newDate = today.add(Duration(days: 7));
         break;
-      case 'Quincenal':
-        newDate = today.add(Duration(days: 15));
-        break;
       case 'Mensual':
         newDate = today.add(Duration(days: 30));
+        break;
+      case 'Bimestral':
+        newDate = today.add(Duration(days: 60));
+        break;
+      case 'Trimestral':
+        newDate = today.add(Duration(days: 90));
         break;
       case 'Semestral':
         newDate = today.add(Duration(days: 180));
@@ -94,15 +99,21 @@ class _NewLoanState extends State<NewLoan> {
     final hcreate = DateFormat('HH:mm:ss').format(now);
     final fcreate = DateFormat('yyyy-MM-dd').format(now);
 
+    final userSnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_pref.uid)
+        .get();
+
+    final user = userSnapshot.data();
+
     DateTime today = DateTime.now();
     String tipePay = tipePayController.text;
     String newDateString = calculateNewDateString(today, tipePay);
 
     double quotaNumber = double.parse(quotaNumberController.text);
-int quotaNumberInt = quotaNumber.truncate();
+    int quotaNumberInt = quotaNumber.truncate();
 
-    final int loanAmount =
-        int.parse(quotaMaxController.text) * quotaNumberInt;
+    final int loanAmount = int.parse(quotaMaxController.text) * quotaNumberInt;
 
     if (clientController.text == '') {
       LoadingScreen().hide();
@@ -110,6 +121,12 @@ int quotaNumberInt = quotaNumber.truncate();
     } else if (clientId == '') {
       LoadingScreen().hide();
       displayMessageToUser('No tiene un id el cliente', context);
+    } else if (workerController.text == '') {
+      LoadingScreen().hide();
+      displayMessageToUser('Debes sleccionar un cobrador', context);
+    } else if (workerId == '') {
+      LoadingScreen().hide();
+      displayMessageToUser('No tiene un id el cobrador', context);
     } else if (amountController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar una cantidad', context);
@@ -125,6 +142,10 @@ int quotaNumberInt = quotaNumber.truncate();
     } else if (quotaMaxController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar unas cuotas maximas', context);
+    } else if (user?['balance'] < int.parse(amountController.text)) {
+      LoadingScreen().hide();
+      displayMessageToUser(
+          'Debe colocar un monto a prestar menor al saldo disponible', context);
     } else {
       FirebaseFirestore.instance
           .collection('Prestamos+${_pref.uid}')
@@ -132,13 +153,16 @@ int quotaNumberInt = quotaNumber.truncate();
           .set({
         'client': clientController.text,
         'clientId': clientId,
+        'worker': workerController.text,
+        'workerId': workerId,
         'amount': int.parse(amountController.text),
         'loanAmount': loanAmount,
         'percentage': int.parse(percentageController.text),
         'tipePay': tipePayController.text,
         'quotaNumber': quotaNumberInt,
         'quotaMax': int.parse(quotaMaxController.text),
-        'state': false,
+        'unpaid': 0,
+        'paid': 0,
         'date': fcreate,
         'hour': hcreate,
         'proxPay': newDateString
@@ -158,41 +182,75 @@ int quotaNumberInt = quotaNumber.truncate();
 
       final client = clientSnapshot.data();
 
+      final workerSnapshot = await FirebaseFirestore.instance
+          .collection('Cobradores+${_pref.uid}')
+          .doc(workerId)
+          .get();
+
+      final worker = workerSnapshot.data();
+
       final int loanAmounts =
-            data?['loanAmounts'] + int.parse(amountController.text);
-        final int collectAmount = data?['collectAmount'] + loanAmount;
-        final int loans = data?['loans'] + 1;
+          data?['loanAmounts'] + int.parse(amountController.text);
+      final int collectAmount = data?['collectAmount'] + loanAmount;
+      final int loans = data?['loans'] + 1;
 
-        FirebaseFirestore.instance
-            .collection('Prestamos+${_pref.uid}')
-            .doc('General')
-            .update({
-          'loans': loans,
-          'loanAmounts': loanAmounts,
-          'collectAmount': collectAmount
-        });
+      final int balance = user?['balance'] - int.parse(amountController.text);
 
-        final int amount = client!['amount'] + int.parse(amountController.text);
-        final int collect = client['collect'] + loanAmount;
-        final int debts = client['debts'] + 1;
+      FirebaseFirestore.instance
+          .collection('Prestamos+${_pref.uid}')
+          .doc('General')
+          .update({
+        'balance': balance,
+        'loans': loans,
+        'loanAmounts': loanAmounts,
+        'collectAmount': collectAmount
+      });
 
-        FirebaseFirestore.instance
-            .collection('Clientes+${_pref.uid}')
-            .doc(clientId)
-            .update({'amount': amount, 'debts': debts, 'collect': collect});
-        clientController.clear();
-        amountController.clear();
-        percentageController.clear();
-        tipePayController.clear();
-        quotaNumberController.clear();
-        quotaMaxController.clear();
-        dateController.clear();
-        hourController.clear();
-        clientId = '';
-        _quota = 0;
-        LoadingScreen().hide();
-        displayMessageToUser('Prestamo guardado', context);
-        Navigator.pushReplacementNamed(context, Loan.routname);
+      FirebaseFirestore.instance.collection('Users').doc(_pref.uid).update({
+        'balance': balance,
+      });
+
+      final int amount_client =
+          client!['amount'] + int.parse(amountController.text);
+      final int collect_client = client['collect'] + loanAmount;
+      final int debts_client = client['debts'] + 1;
+
+      FirebaseFirestore.instance
+          .collection('Clientes+${_pref.uid}')
+          .doc(clientId)
+          .update({
+        'amount': amount_client,
+        'debts': debts_client,
+        'collect': collect_client
+      });
+
+      final int amount_worker =
+          worker!['amount'] + int.parse(amountController.text);
+      final int collect_worker = worker['collect'] + loanAmount;
+      final int loans_worker = worker['loans'] + 1;
+
+      FirebaseFirestore.instance
+          .collection('Cobradores+${_pref.uid}')
+          .doc(clientId)
+          .update({
+        'amount': amount_worker,
+        'loans': loans_worker,
+        'collect': collect_worker
+      });
+      clientController.clear();
+      workerController.clear();
+      amountController.clear();
+      percentageController.clear();
+      tipePayController.clear();
+      quotaNumberController.clear();
+      quotaMaxController.clear();
+      dateController.clear();
+      hourController.clear();
+      clientId = '';
+      _quota = 0;
+      LoadingScreen().hide();
+      displayMessageToUser('Prestamo guardado', context);
+      Navigator.pushReplacementNamed(context, Loan.routname);
     }
   }
 
@@ -294,6 +352,78 @@ int quotaNumberInt = quotaNumber.truncate();
               const SizedBox(
                 height: 10,
               ),
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('Cobradores+${_pref.uid}')
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                        snapshot) {
+                  if (snapshot.hasError) {
+                    print('Error: ${snapshot.error}');
+                    return const CircularProgressIndicator();
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  _dropDownItems = snapshot.data!.docs
+                      .map((doc) =>
+                          '${doc['firstname']} ${doc['middlename']} ${doc['lastname']} ${doc['secondlastname']}')
+                      .cast<String>()
+                      .toList();
+
+                  return DropdownButtonFormField<String>(
+                    value: workerController.text.isNotEmpty
+                        ? workerController.text
+                        : null,
+                    items: _dropDownItems?.map((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                    onChanged: (String? value) {
+                      final DocumentSnapshot<Map<String, dynamic>> doc =
+                          snapshot.data!.docs.firstWhere((doc) =>
+                              '${doc['firstname']} ${doc['middlename']} ${doc['lastname']} ${doc['secondlastname']}' ==
+                              value);
+                      final String docId = doc.id;
+                      setState(() {
+                        workerId = docId;
+                        print(docId);
+                        workerController.text = value!;
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_drop_down),
+                    decoration: InputDecoration(
+                      labelText: 'Cobrador',
+                      border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                      floatingLabelStyle: TextStyle(
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? MyColor.black().color
+                                  : MyColor.white().color),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? MyColor.black().color
+                                    : MyColor.white().color),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
               DropdownButtonFormField<String>(
                 value: tipePayController.text.isNotEmpty
                     ? tipePayController.text
@@ -304,9 +434,11 @@ int quotaNumberInt = quotaNumber.truncate();
                   DropdownMenuItem<String>(
                       value: 'Semanal', child: Text('Semanal')),
                   DropdownMenuItem<String>(
-                      value: 'Quincenal', child: Text('Quincenal')),
-                  DropdownMenuItem<String>(
                       value: 'Mensual', child: Text('Mensual')),
+                  DropdownMenuItem<String>(
+                      value: 'Quincenal', child: Text('Bimestral')),
+                  DropdownMenuItem<String>(
+                      value: 'Quincenal', child: Text('Trimestral')),
                   DropdownMenuItem<String>(
                       value: 'Semestral', child: Text('Semestral')),
                   DropdownMenuItem<String>(
@@ -342,7 +474,7 @@ int quotaNumberInt = quotaNumber.truncate();
               const SizedBox(
                 height: 10,
               ),
-              MyTextField(
+              MyNumberField(
                 labelText: 'Monto a Prestar',
                 obscureText: false,
                 controller: amountController,
@@ -350,7 +482,7 @@ int quotaNumberInt = quotaNumber.truncate();
               const SizedBox(
                 height: 10,
               ),
-              MyTextField(
+              MyNumberField(
                 labelText: 'Porcentaje',
                 obscureText: false,
                 controller: percentageController,
@@ -358,7 +490,7 @@ int quotaNumberInt = quotaNumber.truncate();
               const SizedBox(
                 height: 10,
               ),
-              MyTextField(
+              MyNumberField(
                 labelText: 'Maximo de Cuotas',
                 obscureText: false,
                 controller: quotaMaxController,
@@ -366,7 +498,7 @@ int quotaNumberInt = quotaNumber.truncate();
               const SizedBox(
                 height: 10,
               ),
-              MyTextField(
+              MyNumberField(
                 labelText: 'Monto por Cuota',
                 obscureText: false,
                 controller: quotaNumberController,

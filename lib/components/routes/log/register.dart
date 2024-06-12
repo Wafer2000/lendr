@@ -48,6 +48,12 @@ class _RegisterState extends State<Register> {
       LoadingScreen().hide();
       displayMessageToUser(
           'La contraseña debe contener al menos una letra minúscula', context);
+    } else if (!RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(emailController.text)) {
+      displayMessageToUser(
+          'Error: El email ingresado no es válido. Debe contener un arroba (@) y un dominio válido.',
+          context);
     } else if (!passwordController.text.contains(RegExp(r'[0-9]'))) {
       LoadingScreen().hide();
       displayMessageToUser(
@@ -73,6 +79,7 @@ class _RegisterState extends State<Register> {
           'secondlastname': secondlastnameController.text,
           'email': emailController.text,
           'password': passwordController.text,
+          'balance': 0,
           'fnacimiento': '',
           'celular': '',
           'fperfil': '',
@@ -83,6 +90,7 @@ class _RegisterState extends State<Register> {
             .collection('Prestamos+$uid')
             .doc('General')
             .set({
+          'balance': 0,
           'loans': 0,
           'collectAmount': 0,
           'earnings': 0,

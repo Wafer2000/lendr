@@ -59,9 +59,6 @@ class _CustomersState extends State<Customers> {
     } else if (lastnameController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar los dos apellidos', context);
-    } else if (emailController.text == '') {
-      LoadingScreen().hide();
-      displayMessageToUser('Debe colocar el email', context);
     } else if (phoneController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar el celular', context);
@@ -837,10 +834,7 @@ class _CustomersState extends State<Customers> {
                                                 textAlign: TextAlign.left,
                                               ),
                                               Text(
-                                                NumberFormat.currency(
-                                                        locale: 'es',
-                                                        symbol: '\$')
-                                                    .format(data['debts']),
+                                                data['debts'].toString(),
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                   color: Theme.of(context)

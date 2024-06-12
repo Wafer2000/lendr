@@ -7,7 +7,6 @@ import 'package:lendr/components/routes/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/views/completed_loans.dart';
 import 'package:lendr/components/routes/views/customers.dart';
 import 'package:lendr/components/routes/views/debt_collector.dart';
-import 'package:lendr/components/routes/views/late_payments.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/components/routes/views/profile.dart';
 import 'package:lendr/shared/prefe_users.dart';
@@ -73,21 +72,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, Loan.routname);
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(
-                    Icons.alarm,
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                  ),
-                  title: const Text('C O B R O S'),
-                  subtitle: const Text('A T R A S A D O S'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, LatePayments.routname);
                   },
                 ),
               ),

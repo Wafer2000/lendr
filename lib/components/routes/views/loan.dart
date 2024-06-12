@@ -457,11 +457,14 @@ class _HomeState extends State<Loan> {
                           case 'Semanal':
                             newDate = today.add(Duration(days: 7));
                             break;
-                          case 'Quincenal':
-                            newDate = today.add(Duration(days: 15));
-                            break;
                           case 'Mensual':
                             newDate = today.add(Duration(days: 30));
+                            break;
+                          case 'Bimestral':
+                            newDate = today.add(Duration(days: 60));
+                            break;
+                          case 'Trimestral':
+                            newDate = today.add(Duration(days: 90));
                             break;
                           case 'Semestral':
                             newDate = today.add(Duration(days: 180));
@@ -475,6 +478,16 @@ class _HomeState extends State<Loan> {
                         }
                         return newDate;
                       }
+
+                      final userSnapshot = await FirebaseFirestore.instance
+                          .collection('Users')
+                          .doc(_pref.uid)
+                          .get();
+
+                      final user = userSnapshot.data();
+
+                      final int balance = user?['balance'] -
+                          int.parse(paymentCreditController.text);
 
                       String calculateNewDateString(
                           DateTime today, String tipePay) {
@@ -494,137 +507,164 @@ class _HomeState extends State<Loan> {
                           .doc('General')
                           .get();
 
-                      if (generalSnapshot.exists) {
-                        final doc =
-                            generalSnapshot.data() as Map<String, dynamic>;
+                      if (int.parse(paymentCreditController.text) >=
+                          data['quotaNumber']) {
+                        if (generalSnapshot.exists) {
+                          final doc =
+                              generalSnapshot.data() as Map<String, dynamic>;
 
-                        final int collectAmount = doc['collectAmount'] -
-                            int.parse(paymentCreditController.text);
-                        final int earnings = doc['earnings'] +
-                            int.parse(paymentCreditController.text);
-
-                        final clientSnapshot = await FirebaseFirestore.instance
-                            .collection('Clientes+${_pref.uid}')
-                            .doc(data['clientId'])
-                            .get();
-
-                        if (clientSnapshot.exists) {
-                          final cli =
-                              clientSnapshot.data() as Map<String, dynamic>;
-
-                          final int collect = cli['collect'] -
+                          final int collectAmount = doc['collectAmount'] -
                               int.parse(paymentCreditController.text);
-                          final int debts = cli['debts'] - 1;
+                          final int earnings = doc['earnings'] +
+                              int.parse(paymentCreditController.text);
 
-                          if (paymentCreditController.text == '') {
+                          final clientSnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('Clientes+${_pref.uid}')
+                              .doc(data['clientId'])
+                              .get();
+
+                          if (clientSnapshot.exists) {
+                            final cli =
+                                clientSnapshot.data() as Map<String, dynamic>;
+
+                            final int collect = cli['collect'] -
+                                int.parse(paymentCreditController.text);
+                            final int debts = cli['debts'] - 1;
+
+                            if (paymentCreditController.text == '') {
+                              LoadingScreen().hide();
+                              displayMessageToUser(
+                                  'Debe agregar el abono del cliente', context);
+                            } else {
+                              if (loanAmount == 0) {
+                                final int quota = data['quotaMax'] - 1;
+                                final int loans = doc['loans'] - 1;
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc('General')
+                                    .update({
+                                  'balance': balance,
+                                  'loans': loans,
+                                  'collectAmount': collectAmount,
+                                  'earnings': earnings
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Users')
+                                    .doc(_pref.uid)
+                                    .update({
+                                  'balance': balance,
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc(id)
+                                    .update({
+                                  'loanAmount': loanAmount,
+                                  'proxPay': newDateString,
+                                  'quotaMax': quota
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Clientes+${_pref.uid}')
+                                    .doc(data['clientId'])
+                                    .update(
+                                        {'collect': collect, 'debts': debts});
+
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc(id)
+                                    .collection('Historial')
+                                    .doc()
+                                    .set({
+                                  'client': data['client'],
+                                  'clientId': data['clientId'],
+                                  'loanId': id,
+                                  'amount': data['amount'],
+                                  'address': data['address'],
+                                  'email': data['email'],
+                                  'phone': data['phone'],
+                                  'cashPayment':
+                                      int.parse(paymentCreditController.text),
+                                  'totalDebt': collect,
+                                  'proxPay': newDateString,
+                                  'date': fcreate,
+                                  'hour': hcreate,
+                                });
+                              } else {
+                                final int quota = data['quotaMax'] - 1;
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc('General')
+                                    .update({
+                                  'balance': balance,
+                                  'collectAmount': collectAmount,
+                                  'earnings': earnings
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Users')
+                                    .doc(_pref.uid)
+                                    .update({
+                                  'balance': balance,
+                                  'quotaMax': quota
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc(id)
+                                    .update({
+                                  'loanAmount': loanAmount,
+                                  'proxPay': newDateString
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Clientes+${_pref.uid}')
+                                    .doc(data['clientId'])
+                                    .update({
+                                  'collect': collect,
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Prestamos+${_pref.uid}')
+                                    .doc(id)
+                                    .collection('Historial')
+                                    .doc()
+                                    .set({
+                                  'client': data['client'],
+                                  'clientId': data['clientId'],
+                                  'loanId': id,
+                                  'amount': cli['amount'],
+                                  'cashPayment':
+                                      int.parse(paymentCreditController.text),
+                                  'totalDebt': collect,
+                                  'proxPay': newDateString,
+                                  'date': fcreate,
+                                  'hour': hcreate,
+                                });
+                              }
+                            }
+                            displayMessageToUser('Datos Guardados', context);
+                            paymentCreditController.clear();
+                            LoadingScreen().hide();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          } else {
                             LoadingScreen().hide();
                             displayMessageToUser(
-                                'Debe agregar el abono del cliente', context);
-                          } else {
-                            if (loanAmount == 0) {
-                              final int loans = doc['loans'] - 1;
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc('General')
-                                  .update({
-                                'loans': loans,
-                                'collectAmount': collectAmount,
-                                'earnings': earnings
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc(id)
-                                  .update({
-                                'loanAmount': loanAmount,
-                                'proxPay': newDateString,
-                                'state': true
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Clientes+${_pref.uid}')
-                                  .doc(data['clientId'])
-                                  .update({
-                                'collect': collect,
-                                'debts': debts
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc(id)
-                                  .collection('Historial')
-                                  .doc()
-                                  .set({
-                                'client': data['client'],
-                                'clientId': data['clientId'],
-                                'loanId': id,
-                                'amount': data['amount'],
-                                'address': data['address'],
-                                'email': data['email'],
-                                'phone': data['phone'],
-                                'cashPayment':
-                                    int.parse(paymentCreditController.text),
-                                'totalDebt': collect,
-                                'proxPay': newDateString,
-                                'date': fcreate,
-                                'hour': hcreate,
-                              });
-                            } else {
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc('General')
-                                  .update({
-                                'collectAmount': collectAmount,
-                                'earnings': earnings
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc(id)
-                                  .update({
-                                'loanAmount': loanAmount,
-                                'proxPay': newDateString
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Clientes+${_pref.uid}')
-                                  .doc(data['clientId'])
-                                  .update({
-                                'collect': collect,
-                              });
-
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc(id)
-                                  .collection('Historial')
-                                  .doc()
-                                  .set({
-                                'client': data['client'],
-                                'clientId': data['clientId'],
-                                'loanId': id,
-                                'amount': cli['amount'],
-                                'cashPayment':
-                                    int.parse(paymentCreditController.text),
-                                'totalDebt': collect,
-                                'proxPay': newDateString,
-                                'date': fcreate,
-                                'hour': hcreate,
-                              });
-                            }
+                                'El cliente no existe', context);
                           }
-                          displayMessageToUser('Datos Guardados', context);
-                          paymentCreditController.clear();
-                          LoadingScreen().hide();
-                          Navigator.pop(context);
-                          Navigator.pop(context);
                         } else {
                           LoadingScreen().hide();
-                          displayMessageToUser('El cliente no existe', context);
+                          displayMessageToUser(
+                              'El documento general no existe', context);
                         }
                       } else {
                         LoadingScreen().hide();
                         displayMessageToUser(
-                            'El documento general no existe', context);
+                            'El abono debe ser igual o mayor que de ${data['quotaNumber']}',
+                            context);
                       }
                     },
                     child: Text('Guardar',
@@ -642,6 +682,181 @@ class _HomeState extends State<Loan> {
       },
       barrierDismissible: false,
     );
+  }
+
+  void not_payment_credit(id) async {
+    LoadingScreen().show(context);
+
+    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .collection('Prestamos+${_pref.uid}')
+        .doc(id)
+        .get();
+
+    final data = documentSnapshot.data() as Map<String, dynamic>;
+
+    final now = DateTime.now();
+    final hcreate = DateFormat('HH:mm:ss').format(now);
+    final fcreate = DateFormat('yyyy-MM-dd').format(now);
+
+    DateTime calculateNewDate(DateTime today, String tipePay) {
+      DateTime newDate;
+      switch (tipePay) {
+        case 'Diario':
+          newDate = today.add(Duration(days: 1));
+          break;
+        case 'Semanal':
+          newDate = today.add(Duration(days: 7));
+          break;
+        case 'Mensual':
+          newDate = today.add(Duration(days: 30));
+          break;
+        case 'Bimestral':
+          newDate = today.add(Duration(days: 60));
+          break;
+        case 'Trimestral':
+          newDate = today.add(Duration(days: 90));
+          break;
+        case 'Semestral':
+          newDate = today.add(Duration(days: 180));
+          break;
+        case 'Anual':
+          newDate = today.add(Duration(days: 365));
+          break;
+        default:
+          newDate = today;
+          break;
+      }
+      return newDate;
+    }
+
+    String calculateNewDateString(DateTime today, String tipePay) {
+      DateTime newDate = calculateNewDate(today, tipePay);
+      return DateFormat('yyyy-MM-dd').format(newDate);
+    }
+
+    String tipePay = data['tipePay'];
+    String newDateString = calculateNewDateString(now, tipePay);
+
+    final int loanAmount = data['loanAmount'] - 0;
+
+    final generalSnapshot = await FirebaseFirestore.instance
+        .collection('Prestamos+${_pref.uid}')
+        .doc('General')
+        .get();
+
+    if (generalSnapshot.exists) {
+      final doc = generalSnapshot.data() as Map<String, dynamic>;
+
+      final int collectAmount = doc['collectAmount'] - 0;
+      final int earnings = doc['earnings'] + 0;
+
+      final clientSnapshot = await FirebaseFirestore.instance
+          .collection('Clientes+${_pref.uid}')
+          .doc(data['clientId'])
+          .get();
+
+      if (clientSnapshot.exists) {
+        final cli = clientSnapshot.data() as Map<String, dynamic>;
+
+        final int collect = cli['collect'] - 0;
+        final int debts = cli['debts'] - 1;
+
+        if (loanAmount == 0) {
+          final int loans = doc['loans'] - 1;
+          final int quota = data['quotaMax'] - 1;
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc('General')
+              .update({
+            'loans': loans,
+            'collectAmount': collectAmount,
+            'earnings': earnings
+          });
+
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc(id)
+              .update({
+            'loanAmount': loanAmount,
+            'proxPay': newDateString,
+            'quotaMax': quota
+          });
+
+          FirebaseFirestore.instance
+              .collection('Clientes+${_pref.uid}')
+              .doc(data['clientId'])
+              .update({'collect': collect, 'debts': debts});
+
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc(id)
+              .collection('Historial')
+              .doc()
+              .set({
+            'client': data['client'],
+            'clientId': data['clientId'],
+            'loanId': id,
+            'amount': data['amount'],
+            'address': data['address'],
+            'email': data['email'],
+            'phone': data['phone'],
+            'cashPayment': 0,
+            'totalDebt': collect,
+            'proxPay': newDateString,
+            'date': fcreate,
+            'hour': hcreate,
+          });
+        } else {
+          final int quota = data['quotaMax'] - 1;
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc('General')
+              .update({'collectAmount': collectAmount, 'earnings': earnings});
+
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc(id)
+              .update({
+            'loanAmount': loanAmount,
+            'proxPay': newDateString,
+            'quotaMax': quota
+          });
+
+          FirebaseFirestore.instance
+              .collection('Clientes+${_pref.uid}')
+              .doc(data['clientId'])
+              .update({
+            'collect': collect,
+          });
+
+          FirebaseFirestore.instance
+              .collection('Prestamos+${_pref.uid}')
+              .doc(id)
+              .collection('Historial')
+              .doc()
+              .set({
+            'client': data['client'],
+            'clientId': data['clientId'],
+            'loanId': id,
+            'amount': cli['amount'],
+            'cashPayment': 0,
+            'totalDebt': collect,
+            'proxPay': newDateString,
+            'date': fcreate,
+            'hour': hcreate,
+          });
+        }
+        displayMessageToUser('Datos Guardados', context);
+        paymentCreditController.clear();
+        LoadingScreen().hide();
+      } else {
+        LoadingScreen().hide();
+        displayMessageToUser('El cliente no existe', context);
+      }
+    } else {
+      LoadingScreen().hide();
+      displayMessageToUser('El documento general no existe', context);
+    }
   }
 
   @override
@@ -711,6 +926,43 @@ class _HomeState extends State<Loan> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Saldo Disponible: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? MyColor.black().color
+                                        : MyColor.iron().color,
+                                  ),
+                                ),
+                                Text(
+                                  data['balance'].toString(),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? MyColor.black().color
+                                        : MyColor.iron().color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(
+                            height: 10, // The height of the divider
+                            thickness: 1, // The thickness of the divider
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? MyColor.black().color
+                                    : MyColor.iron().color,
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: Row(
@@ -819,8 +1071,8 @@ class _HomeState extends State<Loan> {
                             ),
                           ),
                           Divider(
-                            height: 10, 
-                            thickness: 1, 
+                            height: 10,
+                            thickness: 1,
                             color:
                                 Theme.of(context).brightness == Brightness.light
                                     ? MyColor.black().color
@@ -872,7 +1124,6 @@ class _HomeState extends State<Loan> {
             StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Prestamos+${_pref.uid}')
-                    .where('state', isEqualTo: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -919,7 +1170,7 @@ class _HomeState extends State<Loan> {
                         final now = DateTime.now();
                         final fhoy = DateFormat('yyyy-MM-dd').format(now);
 
-                        if (fhoy != data['proxPay']) {
+                        if (fhoy == data['proxPay']) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(10, 5, 10, 15),
                             child: Container(
@@ -1016,7 +1267,7 @@ class _HomeState extends State<Loan> {
                                                                   locale: 'es',
                                                                   symbol: '\$')
                                                               .format(data[
-                                                                      'loanAmount']),
+                                                                  'loanAmount']),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -1065,7 +1316,7 @@ class _HomeState extends State<Loan> {
                                                                   locale: 'es',
                                                                   symbol: '\$')
                                                               .format(data[
-                                                                      'quotaNumber']),
+                                                                  'quotaNumber']),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -1109,7 +1360,8 @@ class _HomeState extends State<Loan> {
                                                           ),
                                                         ),
                                                         Text(
-                                                          data['quotaMax'].toString(),
+                                                          data['quotaMax']
+                                                              .toString(),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -1178,8 +1430,7 @@ class _HomeState extends State<Loan> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 IconButton(
-                                                  icon: const Icon(
-                                                      Icons.monetization_on),
+                                                  icon: const Icon(Icons.check),
                                                   onPressed: () {
                                                     new_payment_credit(docID);
                                                   },
@@ -1192,8 +1443,19 @@ class _HomeState extends State<Loan> {
                                                       : MyColor.iron().color,
                                                   alignment: Alignment.center,
                                                 ),
-                                                const SizedBox(
-                                                  width: 10,
+                                                IconButton(
+                                                  icon: const Icon(Icons.close),
+                                                  onPressed: () {
+                                                    not_payment_credit(docID);
+                                                  },
+                                                  iconSize: 35,
+                                                  tooltip: 'Abono',
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                  alignment: Alignment.center,
                                                 ),
                                                 IconButton(
                                                   icon: const Icon(
