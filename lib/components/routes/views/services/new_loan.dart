@@ -3,10 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_button.dart';
-import 'package:lendr/components/routes/tools/my_numberfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_button.dart';
+import 'package:lendr/tools/my_numberfield.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';
@@ -231,11 +231,11 @@ class _NewLoanState extends State<NewLoan> {
 
       FirebaseFirestore.instance
           .collection('Cobradores+${_pref.uid}')
-          .doc(clientId)
+          .doc(workerId)
           .update({
         'amount': amount_worker,
         'loans': loans_worker,
-        'collect': collect_worker
+        'collect': collect_worker,
       });
       clientController.clear();
       workerController.clear();

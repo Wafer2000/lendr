@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/my_drawer.dart';
+import 'package:lendr/tools/my_drawer.dart';
 import 'package:lendr/components/routes/views/guard/extra_data.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';

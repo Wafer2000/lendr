@@ -3,9 +3,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_textfield.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';
 

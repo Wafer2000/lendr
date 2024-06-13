@@ -3,11 +3,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_drawer.dart';
-import 'package:lendr/components/routes/tools/my_numberfield.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_drawer.dart';
+import 'package:lendr/tools/my_numberfield.dart';
+import 'package:lendr/tools/my_textfield.dart';
 import 'package:lendr/components/routes/views/customer_debts.dart';
 import 'package:lendr/firebase/firestore.dart';
 import 'package:lendr/shared/prefe_users.dart';
@@ -98,7 +98,9 @@ class _DebtCollectorState extends State<DebtCollector> {
         'lendr': _pref.uid,
         'collect': 0,
         'amount': 0,
-        'loans': 0
+        'loans': 0,
+        'unpaid': 0,
+        'paid': 0,
       });
       displayMessageToUser('Cobrador Guardado', context);
       LoadingScreen().hide();
@@ -882,6 +884,72 @@ class _DebtCollectorState extends State<DebtCollector> {
                                                         locale: 'es',
                                                         symbol: '\$')
                                                     .format(data['collect']),
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Bonos Cobrados: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                              Text(
+                                                data['paid'].toString(),
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Bonos No Cobrados: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                              Text(
+                                                data['unpaid'].toString(),
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                   color: Theme.of(context)

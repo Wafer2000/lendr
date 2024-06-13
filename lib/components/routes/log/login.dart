@@ -3,10 +3,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lendr/components/routes/log/register.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_button.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_button.dart';
+import 'package:lendr/tools/my_textfield.dart';
 import 'package:lendr/components/routes/views/loan.dart';
 import 'package:lendr/shared/prefe_users.dart';
 

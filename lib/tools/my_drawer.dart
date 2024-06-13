@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lendr/components/routes/log/login.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
+import 'package:lendr/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/views/completed_loans.dart';
 import 'package:lendr/components/routes/views/customers.dart';
 import 'package:lendr/components/routes/views/debt_collector.dart';
@@ -65,7 +65,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   leading: Icon(
-                    Icons.attach_money,
+                    Icons.bar_chart,
                     color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                   title: const Text('P R E S T A M O S'),
@@ -79,7 +79,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   leading: Icon(
-                    Icons.check_circle,
+                    Icons.credit_score,
                     color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                   title: const Text('C O B R O S'),
@@ -108,7 +108,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   leading: Icon(
-                    Icons.credit_card,
+                    Icons.assignment_ind,
                     color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                   title: const Text('C O B R A D O R E S'),

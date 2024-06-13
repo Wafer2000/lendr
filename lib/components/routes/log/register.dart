@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lendr/components/routes/log/login.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_button.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_button.dart';
+import 'package:lendr/tools/my_textfield.dart';
 import 'package:lendr/components/routes/views/guard/extra_data.dart';
 import 'package:lendr/shared/prefe_users.dart';
 
@@ -94,7 +94,9 @@ class _RegisterState extends State<Register> {
           'loans': 0,
           'collectAmount': 0,
           'earnings': 0,
-          'loanAmounts': 0
+          'loanAmounts': 0,
+          'unpaid': 0,
+          'paid': 0,
         });
         LoadingScreen().hide();
         Navigator.pushReplacement(

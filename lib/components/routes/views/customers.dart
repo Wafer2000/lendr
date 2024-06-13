@@ -3,11 +3,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_drawer.dart';
-import 'package:lendr/components/routes/tools/my_numberfield.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_drawer.dart';
+import 'package:lendr/tools/my_numberfield.dart';
+import 'package:lendr/tools/my_textfield.dart';
 import 'package:lendr/components/routes/views/customer_debts.dart';
 import 'package:lendr/firebase/firestore.dart';
 import 'package:lendr/shared/prefe_users.dart';
@@ -103,7 +103,9 @@ class _CustomersState extends State<Customers> {
         'lendr': _pref.uid,
         'collect': 0,
         'amount': 0,
-        'debts': 0
+        'debts': 0,
+        'unpaid': 0,
+        'paid': 0,
       });
       displayMessageToUser('Cliente guardado', context);
       LoadingScreen().hide();
@@ -694,7 +696,7 @@ class _CustomersState extends State<Customers> {
             return Scaffold(
               appBar: AppBar(
                 elevation: 0,
-                title: const Center(child: Text('C o b r a d o r e s')),
+                title: const Center(child: Text('C l i e n t e s')),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.add),
@@ -729,7 +731,7 @@ class _CustomersState extends State<Customers> {
           return Scaffold(
             appBar: AppBar(
               elevation: 0,
-              title: const Center(child: Text('C o b r a d o r e s')),
+              title: const Center(child: Text('C l i e n t e s')),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -907,6 +909,72 @@ class _CustomersState extends State<Customers> {
                                                         locale: 'es',
                                                         symbol: '\$')
                                                     .format(data['collect']),
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Bonos Pagados: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                              Text(
+                                                data['paid'].toString(),
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Bonos en Mora: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? MyColor.black().color
+                                                      : MyColor.iron().color,
+                                                ),
+                                              ),
+                                              Text(
+                                                data['unpaid'].toString(),
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                   color: Theme.of(context)

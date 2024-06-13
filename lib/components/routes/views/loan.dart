@@ -3,10 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lendr/components/routes/tools/helper_functions.dart';
-import 'package:lendr/components/routes/tools/loading_indicator.dart';
-import 'package:lendr/components/routes/tools/my_drawer.dart';
-import 'package:lendr/components/routes/tools/my_textfield.dart';
+import 'package:lendr/tools/helper_functions.dart';
+import 'package:lendr/tools/loading_indicator.dart';
+import 'package:lendr/tools/my_drawer.dart';
+import 'package:lendr/tools/my_numberfield.dart';
 import 'package:lendr/components/routes/views/services/new_loan.dart';
 import 'package:lendr/shared/prefe_users.dart';
 import 'package:lendr/style/global_colors.dart';
@@ -32,19 +32,11 @@ class _HomeState extends State<Loan> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Historial',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
-            ),
-            icon: Icon(
-              Icons.list,
-              color: Theme.of(context).primaryColor,
-            ),
+          return Dialog(
             backgroundColor: Theme.of(context).colorScheme.surface,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            content: StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Prestamos+${_pref.uid}')
                     .doc(id)
@@ -78,282 +70,122 @@ class _HomeState extends State<Loan> {
                       ),
                     );
                   }
+
                   return Scaffold(
                     backgroundColor: Colors.transparent,
-                    body: ListView.builder(
-                      itemCount: service?.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot document = service![index];
-                        Map<String, dynamic> data =
-                            document.data() as Map<String, dynamic>;
-
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                          child: Container(
-                            width: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Theme.of(context).colorScheme.surface,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? Colors.grey.withOpacity(0.7)
-                                      : Colors.black.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 10,
-                                  offset: const Offset(
-                                      0, 3), // changes position of shadow
+                    body: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Historial de los Abonos',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(
+                                  label: Text(
+                                    'ID',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Cliente',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Cobrador',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Abono',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Deuda Faltante',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Fecha',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Hora',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Estado',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 20, 0, 20),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Cliente: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['client']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Prestamo: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['amount']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Abono: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['cashPayment']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Deuda Faltante: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['totalDebt']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Proximo Cobro: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['proxPay']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Divider(
-                                    height: 10, // The height of the divider
-                                    thickness:
-                                        1, // The thickness of the divider
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? MyColor.black().color
-                                        : MyColor.white()
-                                            .color, // The color of the divider
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Hora de Abono: ',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                      Text(
-                                        '${data['hour']}',
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Fecha de Abono: ',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                      Text(
-                                        '${data['date']}',
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                              rows: service!.asMap().entries.map((entry) {
+                                Map<String, dynamic> data =
+                                    entry.value.data() as Map<String, dynamic>;
+                                String docId = entry.value.id;
+                                return DataRow(
+                                  cells: <DataCell>[
+                                    DataCell(Text('${entry.key + 1}')),
+                                    DataCell(Text('${data['client']}')),
+                                    DataCell(Text('${data['worker']}')),
+                                    DataCell(Text(NumberFormat.currency(
+                                            locale: 'es', symbol: '\$')
+                                        .format(data['cashPayment']))),
+                                    DataCell(Text(NumberFormat.currency(
+                                            locale: 'es', symbol: '\$')
+                                        .format(data['totalDebt']))),
+                                    DataCell(Text('${data['date']}')),
+                                    DataCell(Text('${data['hour']}')),
+                                    DataCell(data['cashPayment'] == 0
+                                        ? Text('En mora')
+                                        : Text('Pago')),
+                                  ],
+                                );
+                              }).toList(),
                             ),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   );
                 }),
@@ -377,7 +209,7 @@ class _HomeState extends State<Loan> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MyTextField(
+                  MyNumberField(
                     labelText: 'Abono a la deuda',
                     obscureText: false,
                     controller: paymentCreditController,
@@ -486,8 +318,10 @@ class _HomeState extends State<Loan> {
 
                       final user = userSnapshot.data();
 
-                      final int balance = user?['balance'] -
+                      final int balance = user?['balance'] +
                           int.parse(paymentCreditController.text);
+
+                      final int paidPrestamo = data['paid'] + 1;
 
                       String calculateNewDateString(
                           DateTime today, String tipePay) {
@@ -513,6 +347,8 @@ class _HomeState extends State<Loan> {
                           final doc =
                               generalSnapshot.data() as Map<String, dynamic>;
 
+                          final int paidGeneral = doc['paid'] + 1;
+
                           final int collectAmount = doc['collectAmount'] -
                               int.parse(paymentCreditController.text);
                           final int earnings = doc['earnings'] +
@@ -524,6 +360,14 @@ class _HomeState extends State<Loan> {
                               .doc(data['clientId'])
                               .get();
 
+                          final workSnapshot = await FirebaseFirestore.instance
+                              .collection('Cobradores+${_pref.uid}')
+                              .doc(data['workerId'])
+                              .get();
+
+                          final work =
+                              workSnapshot.data() as Map<String, dynamic>;
+
                           if (clientSnapshot.exists) {
                             final cli =
                                 clientSnapshot.data() as Map<String, dynamic>;
@@ -531,6 +375,8 @@ class _HomeState extends State<Loan> {
                             final int collect = cli['collect'] -
                                 int.parse(paymentCreditController.text);
                             final int debts = cli['debts'] - 1;
+                            final int paidCliente = cli['paid'] + 1;
+                            final int paidCobrador = work['paid'] + 1;
 
                             if (paymentCreditController.text == '') {
                               LoadingScreen().hide();
@@ -547,7 +393,8 @@ class _HomeState extends State<Loan> {
                                   'balance': balance,
                                   'loans': loans,
                                   'collectAmount': collectAmount,
-                                  'earnings': earnings
+                                  'earnings': earnings,
+                                  'paid': paidGeneral
                                 });
 
                                 FirebaseFirestore.instance
@@ -563,14 +410,27 @@ class _HomeState extends State<Loan> {
                                     .update({
                                   'loanAmount': loanAmount,
                                   'proxPay': newDateString,
-                                  'quotaMax': quota
+                                  'quotaMax': quota,
+                                  'paid': paidPrestamo
                                 });
 
                                 FirebaseFirestore.instance
                                     .collection('Clientes+${_pref.uid}')
                                     .doc(data['clientId'])
-                                    .update(
-                                        {'collect': collect, 'debts': debts});
+                                    .update({
+                                  'collect': collect,
+                                  'debts': debts,
+                                  'paid': paidCliente
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Cobradores+${_pref.uid}')
+                                    .doc(data['workerId'])
+                                    .update({
+                                  'collect': collect,
+                                  'debts': debts,
+                                  'paid': paidCobrador,
+                                });
 
                                 FirebaseFirestore.instance
                                     .collection('Prestamos+${_pref.uid}')
@@ -580,6 +440,8 @@ class _HomeState extends State<Loan> {
                                     .set({
                                   'client': data['client'],
                                   'clientId': data['clientId'],
+                                  'worker': data['worker'],
+                                  'workerId': data['workerId'],
                                   'loanId': id,
                                   'amount': data['amount'],
                                   'address': data['address'],
@@ -592,6 +454,37 @@ class _HomeState extends State<Loan> {
                                   'date': fcreate,
                                   'hour': hcreate,
                                 });
+
+                                final gananciasSnapshot =
+                                    await FirebaseFirestore.instance
+                                        .collection('Ganancias+${_pref.uid}')
+                                        .doc(fcreate)
+                                        .get();
+
+                                if (gananciasSnapshot.exists) {
+                                  final gan = gananciasSnapshot.data()
+                                      as Map<String, dynamic>;
+
+                                  final int ganancias = gan['profits'] +
+                                      int.parse(paymentCreditController.text);
+
+                                  FirebaseFirestore.instance
+                                      .collection('Ganancias+${_pref.uid}')
+                                      .doc(fcreate)
+                                      .update({
+                                    'profits': ganancias,
+                                    'date': fcreate,
+                                  });
+                                } else {
+                                  FirebaseFirestore.instance
+                                      .collection('Ganancias+${_pref.uid}')
+                                      .doc(fcreate)
+                                      .update({
+                                    'profits':
+                                        int.parse(paymentCreditController.text),
+                                    'date': fcreate,
+                                  });
+                                }
                               } else {
                                 final int quota = data['quotaMax'] - 1;
                                 FirebaseFirestore.instance
@@ -600,7 +493,8 @@ class _HomeState extends State<Loan> {
                                     .update({
                                   'balance': balance,
                                   'collectAmount': collectAmount,
-                                  'earnings': earnings
+                                  'earnings': earnings,
+                                  'paid': paidGeneral
                                 });
 
                                 FirebaseFirestore.instance
@@ -616,7 +510,9 @@ class _HomeState extends State<Loan> {
                                     .doc(id)
                                     .update({
                                   'loanAmount': loanAmount,
-                                  'proxPay': newDateString
+                                  'proxPay': newDateString,
+                                  'quotaMax': quota,
+                                  'paid': paidPrestamo
                                 });
 
                                 FirebaseFirestore.instance
@@ -624,6 +520,15 @@ class _HomeState extends State<Loan> {
                                     .doc(data['clientId'])
                                     .update({
                                   'collect': collect,
+                                  'paid': paidCliente
+                                });
+
+                                FirebaseFirestore.instance
+                                    .collection('Cobradores+${_pref.uid}')
+                                    .doc(data['workerId'])
+                                    .update({
+                                  'collect': collect,
+                                  'paid': paidCobrador,
                                 });
 
                                 FirebaseFirestore.instance
@@ -634,6 +539,8 @@ class _HomeState extends State<Loan> {
                                     .set({
                                   'client': data['client'],
                                   'clientId': data['clientId'],
+                                  'worker': data['worker'],
+                                  'workerId': data['workerId'],
                                   'loanId': id,
                                   'amount': cli['amount'],
                                   'cashPayment':
@@ -643,6 +550,37 @@ class _HomeState extends State<Loan> {
                                   'date': fcreate,
                                   'hour': hcreate,
                                 });
+
+                                final gananciasSnapshot =
+                                    await FirebaseFirestore.instance
+                                        .collection('Ganancias+${_pref.uid}')
+                                        .doc(fcreate)
+                                        .get();
+
+                                if (gananciasSnapshot.exists) {
+                                  final gan = gananciasSnapshot.data()
+                                      as Map<String, dynamic>;
+
+                                  final int ganancias = gan['profits'] +
+                                      int.parse(paymentCreditController.text);
+
+                                  FirebaseFirestore.instance
+                                      .collection('Ganancias+${_pref.uid}')
+                                      .doc(fcreate)
+                                      .update({
+                                    'profits': ganancias,
+                                    'date': fcreate,
+                                  });
+                                } else {
+                                  FirebaseFirestore.instance
+                                      .collection('Ganancias+${_pref.uid}')
+                                      .doc(fcreate)
+                                      .update({
+                                    'profits':
+                                        int.parse(paymentCreditController.text),
+                                    'date': fcreate,
+                                  });
+                                }
                               }
                             }
                             displayMessageToUser('Datos Guardados', context);
@@ -729,6 +667,8 @@ class _HomeState extends State<Loan> {
       return newDate;
     }
 
+    final int unpaidPrestamo = data['unpaid'] + 1;
+
     String calculateNewDateString(DateTime today, String tipePay) {
       DateTime newDate = calculateNewDate(today, tipePay);
       return DateFormat('yyyy-MM-dd').format(newDate);
@@ -747,6 +687,8 @@ class _HomeState extends State<Loan> {
     if (generalSnapshot.exists) {
       final doc = generalSnapshot.data() as Map<String, dynamic>;
 
+      final int unpaidGeneral = doc['unpaid'] + 1;
+
       final int collectAmount = doc['collectAmount'] - 0;
       final int earnings = doc['earnings'] + 0;
 
@@ -755,11 +697,20 @@ class _HomeState extends State<Loan> {
           .doc(data['clientId'])
           .get();
 
+      final workSnapshot = await FirebaseFirestore.instance
+          .collection('Cobradores+${_pref.uid}')
+          .doc(data['workerId'])
+          .get();
+
+      final work = workSnapshot.data() as Map<String, dynamic>;
+
       if (clientSnapshot.exists) {
         final cli = clientSnapshot.data() as Map<String, dynamic>;
 
         final int collect = cli['collect'] - 0;
         final int debts = cli['debts'] - 1;
+        final int unpaidCliente = cli['unpaid'] + 1;
+        final int unpaidCobrador = work['unpaid'] + 1;
 
         if (loanAmount == 0) {
           final int loans = doc['loans'] - 1;
@@ -770,7 +721,8 @@ class _HomeState extends State<Loan> {
               .update({
             'loans': loans,
             'collectAmount': collectAmount,
-            'earnings': earnings
+            'earnings': earnings,
+            'unpaid': unpaidGeneral
           });
 
           FirebaseFirestore.instance
@@ -779,13 +731,27 @@ class _HomeState extends State<Loan> {
               .update({
             'loanAmount': loanAmount,
             'proxPay': newDateString,
-            'quotaMax': quota
+            'quotaMax': quota,
+            'unpaid': unpaidPrestamo
           });
 
           FirebaseFirestore.instance
               .collection('Clientes+${_pref.uid}')
               .doc(data['clientId'])
-              .update({'collect': collect, 'debts': debts});
+              .update({
+            'collect': collect,
+            'debts': debts,
+            'unpaid': unpaidCliente
+          });
+
+          FirebaseFirestore.instance
+              .collection('Cobradores+${_pref.uid}')
+              .doc(data['workerId'])
+              .update({
+            'collect': collect,
+            'debts': debts,
+            'unpaid': unpaidCobrador,
+          });
 
           FirebaseFirestore.instance
               .collection('Prestamos+${_pref.uid}')
@@ -795,6 +761,8 @@ class _HomeState extends State<Loan> {
               .set({
             'client': data['client'],
             'clientId': data['clientId'],
+            'worker': data['worker'],
+            'workerId': data['workerId'],
             'loanId': id,
             'amount': data['amount'],
             'address': data['address'],
@@ -811,7 +779,16 @@ class _HomeState extends State<Loan> {
           FirebaseFirestore.instance
               .collection('Prestamos+${_pref.uid}')
               .doc('General')
-              .update({'collectAmount': collectAmount, 'earnings': earnings});
+              .update({
+            'collectAmount': collectAmount,
+            'earnings': earnings,
+            'unpaid': unpaidGeneral
+          });
+
+          FirebaseFirestore.instance
+              .collection('Users')
+              .doc(_pref.uid)
+              .update({'quotaMax': quota});
 
           FirebaseFirestore.instance
               .collection('Prestamos+${_pref.uid}')
@@ -819,14 +796,21 @@ class _HomeState extends State<Loan> {
               .update({
             'loanAmount': loanAmount,
             'proxPay': newDateString,
-            'quotaMax': quota
+            'quotaMax': quota,
+            'unpaid': unpaidPrestamo
           });
 
           FirebaseFirestore.instance
               .collection('Clientes+${_pref.uid}')
               .doc(data['clientId'])
+              .update({'collect': collect, 'unpaid': unpaidCliente});
+
+          FirebaseFirestore.instance
+              .collection('Cobradores+${_pref.uid}')
+              .doc(data['workerId'])
               .update({
             'collect': collect,
+            'unpaid': unpaidCobrador,
           });
 
           FirebaseFirestore.instance
@@ -837,6 +821,8 @@ class _HomeState extends State<Loan> {
               .set({
             'client': data['client'],
             'clientId': data['clientId'],
+            'worker': data['worker'],
+            'workerId': data['workerId'],
             'loanId': id,
             'amount': cli['amount'],
             'cashPayment': 0,
@@ -943,7 +929,9 @@ class _HomeState extends State<Loan> {
                                   ),
                                 ),
                                 Text(
-                                  data['balance'].toString(),
+                                  NumberFormat.currency(
+                                          locale: 'es', symbol: '\$')
+                                      .format(data['balance']),
                                   style: TextStyle(
                                     fontSize: 20,
                                     color: Theme.of(context).brightness ==
@@ -1406,6 +1394,94 @@ class _HomeState extends State<Loan> {
                                                         ),
                                                         Text(
                                                           '${data['percentage']}%',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 5),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Abonos Pagados: ',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${data['paid'].toString()}',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 5),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Abonos en Mora: ',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${data['unpaid'].toString()}',
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
