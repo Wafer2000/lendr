@@ -49,7 +49,7 @@ class _CustomersState extends State<Customers> {
     final fcreate = DateFormat('yyyy-MM-dd').format(now);
 
     final doc = await FirebaseFirestore.instance
-        .collection('Cobradores+${_pref.uid}')
+        .collection('Clientes')
         .doc(dniController.text)
         .get();
 
@@ -83,8 +83,8 @@ class _CustomersState extends State<Customers> {
       displayMessageToUser(
           'Este Cliente ya existe en la Base de Datos', context);
     } else {
-      FirebaseFirestore.instance
-          .collection('Cobradores+${_pref.uid}')
+    await FirebaseFirestore.instance
+          .collection('Clientes')
           .doc(dniController.text)
           .set({
         'firstname': firstnameController.text,
@@ -292,7 +292,7 @@ class _CustomersState extends State<Customers> {
       builder: (context) {
         return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance
-                .collection('Cobradores+${_pref.uid}')
+                .collection('Cobradores')
                 .doc(id)
                 .snapshots(),
             builder: (context, snapshot) {
@@ -526,8 +526,8 @@ class _CustomersState extends State<Customers> {
                                   'Debe colocar el departamento de residencia',
                                   context);
                             } else {
-                              FirebaseFirestore.instance
-                                  .collection('Cobradores+${_pref.uid}')
+                            await FirebaseFirestore.instance
+                                  .collection('Clientes')
                                   .doc(id)
                                   .update({
                                 'firstname': firstnameController.text,
@@ -569,8 +569,8 @@ class _CustomersState extends State<Customers> {
   void EliminateClient(id) async {
     LoadingScreen().show(context);
 
-    FirebaseFirestore.instance
-        .collection('Cobradores+${_pref.uid}')
+  await FirebaseFirestore.instance
+        .collection('Clientes')
         .doc(id)
         .delete();
     displayMessageToUser('Cliente Eliminado', context);
@@ -657,7 +657,6 @@ class _CustomersState extends State<Customers> {
                   child: TextButton(
                     onPressed: () async {
                       EliminateClient(id);
-                      Navigator.pop(context);
                     },
                     child: Text('Eliminar',
                         style: TextStyle(
@@ -681,7 +680,7 @@ class _CustomersState extends State<Customers> {
     final collections = GetCollectionsLoan();
 
     return StreamBuilder<QuerySnapshot>(
-        stream: collections.getCollections(_pref.uid, 'Clientes'),
+        stream: collections.getCollections('Clientes', _pref.uid),
         builder: (context, snapshot) {
           final service = snapshot.data?.docs;
 

@@ -44,7 +44,7 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             content: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
+                    .collection('Prestamos')
                     .doc(id)
                     .collection('Historial')
                     .orderBy('date', descending: true)
@@ -443,7 +443,7 @@ class _CustomerDebtsState extends State<CustomerDebts> {
 
                       final DocumentSnapshot documentSnapshot =
                           await FirebaseFirestore.instance
-                              .collection('Prestamos+${_pref.uid}')
+                              .collection('Prestamos')
                               .doc(id)
                               .get();
 
@@ -497,8 +497,8 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                           int.parse(paymentCreditController.text);
 
                       final generalSnapshot = await FirebaseFirestore.instance
-                          .collection('Prestamos+${_pref.uid}')
-                          .doc('General')
+                          .collection('Prestamos')
+                          .doc('General${_pref.uid}')
                           .get();
 
                       if (generalSnapshot.exists) {
@@ -511,8 +511,14 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                             int.parse(paymentCreditController.text);
 
                         final clientSnapshot = await FirebaseFirestore.instance
-                            .collection('Clientes+${_pref.uid}')
+                            .collection('Clientes')
                             .doc(data['clientId'])
+                            .get();
+
+                        final cobradorSnapshot = await FirebaseFirestore
+                            .instance
+                            .collection('Cobradores')
+                            .doc(data['workerId'])
                             .get();
 
                         if (clientSnapshot.exists) {
@@ -530,17 +536,17 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                           } else {
                             if (loanAmount == 0) {
                               final int loans = doc['loans'] - 1;
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc('General')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
+                                  .doc('General${_pref.uid}')
                                   .update({
                                 'loans': loans,
                                 'collectAmount': collectAmount,
                                 'earnings': earnings
                               });
 
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
                                   .doc(id)
                                   .update({
                                 'loanAmount': loanAmount,
@@ -548,13 +554,13 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                                 'state': true
                               });
 
-                              FirebaseFirestore.instance
-                                  .collection('Clientes+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Clientes')
                                   .doc(data['clientId'])
                                   .update({'collect': collect, 'debts': debts});
 
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
                                   .doc(id)
                                   .collection('Historial')
                                   .doc()
@@ -570,32 +576,43 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                                 'date': fcreate,
                                 'hour': hcreate,
                               });
+
+                              final diff =
+                                  int.parse(paymentCreditController.text) +
+                                      cobradorSnapshot['diff'];
+
+                              await FirebaseFirestore.instance
+                                  .collection('Cobradores')
+                                  .doc(data['workerId'])
+                                  .update({
+                                'diff': diff,
+                              });
                             } else {
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
-                                  .doc('General')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
+                                  .doc('General${_pref.uid}')
                                   .update({
                                 'collectAmount': collectAmount,
                                 'earnings': earnings
                               });
 
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
                                   .doc(id)
                                   .update({
                                 'loanAmount': loanAmount,
                                 'proxPay': newDateString
                               });
 
-                              FirebaseFirestore.instance
-                                  .collection('Clientes+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Clientes')
                                   .doc(data['clientId'])
                                   .update({
                                 'collect': collect,
                               });
 
-                              FirebaseFirestore.instance
-                                  .collection('Prestamos+${_pref.uid}')
+                              await FirebaseFirestore.instance
+                                  .collection('Prestamos')
                                   .doc(id)
                                   .collection('Historial')
                                   .doc()
@@ -610,6 +627,17 @@ class _CustomerDebtsState extends State<CustomerDebts> {
                                 'proxPay': newDateString,
                                 'date': fcreate,
                                 'hour': hcreate,
+                              });
+
+                              final diff =
+                                  int.parse(paymentCreditController.text) +
+                                      cobradorSnapshot['diff'];
+
+                              await FirebaseFirestore.instance
+                                  .collection('Cobradores')
+                                  .doc(data['workerId'])
+                                  .update({
+                                'diff': diff,
                               });
                             }
                           }
@@ -667,7 +695,8 @@ class _CustomerDebtsState extends State<CustomerDebts> {
           children: [
             StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
+                    .collection('Prestamos')
+                    .where('user', isEqualTo: _pref.uid)
                     .where('clientId', isEqualTo: _pref.loanId)
                     .snapshots(),
                 builder: (context, snapshot) {

@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lendr/components/routes/log/login.dart';
+import 'package:lendr/components/routes/views/reports.dart';
 import 'package:lendr/tools/loading_indicator.dart';
 import 'package:lendr/components/routes/views/completed_loans.dart';
 import 'package:lendr/components/routes/views/customers.dart';
@@ -65,13 +66,27 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   leading: Icon(
-                    Icons.bar_chart,
+                    Icons.payment,
                     color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                   title: const Text('P R E S T A M O S'),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, Loan.routname);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.bar_chart,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                  ),
+                  title: const Text('R E P O R T E S'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, Reports.routname);
                   },
                 ),
               ),

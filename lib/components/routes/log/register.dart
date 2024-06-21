@@ -71,7 +71,7 @@ class _RegisterState extends State<Register> {
 
         var uid = userCredential.user?.uid;
         pref.uid = uid!;
-        FirebaseFirestore.instance.collection('Users').doc(uid).set({
+        await FirebaseFirestore.instance.collection('Users').doc(uid).set({
           'uid': uid,
           'firstname': firstnameController.text,
           'middlename': middlenameController.text,
@@ -79,16 +79,17 @@ class _RegisterState extends State<Register> {
           'secondlastname': secondlastnameController.text,
           'email': emailController.text,
           'password': passwordController.text,
-          'balance': 0,
+          'balance': '',
           'fnacimiento': '',
+          'cedula': '',
           'celular': '',
           'fperfil': '',
           'sexo': '',
           'direccion': '',
         });
-        FirebaseFirestore.instance
-            .collection('Prestamos+$uid')
-            .doc('General')
+      await FirebaseFirestore.instance
+            .collection('Prestamos')
+            .doc('General$uid')
             .set({
           'balance': 0,
           'loans': 0,

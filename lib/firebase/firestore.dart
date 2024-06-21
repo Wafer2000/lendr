@@ -18,7 +18,7 @@ class GetCollectionsLoan {
   final _firestore = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> getCollections(String collection, String typecollection) {
-    final services = _firestore.collection('$typecollection+$collection').snapshots();
+    final services = _firestore.collection(collection).where('lendr', isEqualTo: typecollection).snapshots();
     return services;
   }
 }

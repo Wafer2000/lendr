@@ -57,10 +57,12 @@ class _ExtraDataState extends State<ExtraData> {
               TextEditingController(text: user['sexo']);
           final TextEditingController phoneController =
               TextEditingController(text: user['celular']);
+          final TextEditingController cedulaController =
+              TextEditingController(text: user['cedula']);
           final TextEditingController ageController =
               TextEditingController(text: user['fnacimiento']);
           final TextEditingController balanceController =
-              TextEditingController(text: user['balance'].toString());
+              TextEditingController(text: user['balance']);
 
           void Guardar() async {
             LoadingScreen().show(context);
@@ -78,6 +80,14 @@ class _ExtraDataState extends State<ExtraData> {
               LoadingScreen().hide();
               displayMessageToUser(
                   'Debe colocar su fecha de nacimiento', context);
+            } else if (balanceController.text == '') {
+              LoadingScreen().hide();
+              displayMessageToUser(
+                  'Debe colocar su Balance de entrada', context);
+            } else if (cedulaController.text == '') {
+              LoadingScreen().hide();
+              displayMessageToUser(
+                  'Debe colocar su fecha de nacimiento', context);
             } else {
               try {
                 FirebaseFirestore.instance
@@ -86,14 +96,15 @@ class _ExtraDataState extends State<ExtraData> {
                     .update({
                   'fnacimiento': ageController.text,
                   'celular': phoneController.text,
+                  'cedula': cedulaController.text,
                   'fperfil': fotoPerfilController.text,
                   'sexo': sexController.text,
                   'direccion': addressController.text,
-                  'balance': int.parse(balanceController.text),
+                  'balance': balanceController.text,
                 });
                 FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
-                    .doc('General')
+                    .collection('Prestamos')
+                    .doc('General${_pref.uid}')
                     .update({
                   'balance': int.parse(balanceController.text),
                 });
@@ -157,6 +168,13 @@ class _ExtraDataState extends State<ExtraData> {
                         labelText: 'Numero Celular',
                         obscureText: false,
                         controller: phoneController),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    MyNumberField(
+                        labelText: 'Cedula',
+                        obscureText: false,
+                        controller: cedulaController),
                     const SizedBox(
                       height: 10,
                     ),

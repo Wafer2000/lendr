@@ -171,7 +171,7 @@ class _ProfileState extends State<Profile> {
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           Text(
-                            '${user['celular']}',
+                            '${user['celular'].toString()}',
                             style: const TextStyle(fontSize: 20),
                           ),
                         ],

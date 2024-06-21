@@ -106,6 +106,13 @@ class _NewLoanState extends State<NewLoan> {
 
     final user = userSnapshot.data();
 
+    final clientSnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_pref.uid)
+        .get();
+
+    final clientUser = clientSnapshot.data();
+
     DateTime today = DateTime.now();
     String tipePay = tipePayController.text;
     String newDateString = calculateNewDateString(today, tipePay);
@@ -142,13 +149,13 @@ class _NewLoanState extends State<NewLoan> {
     } else if (quotaMaxController.text == '') {
       LoadingScreen().hide();
       displayMessageToUser('Debe colocar unas cuotas maximas', context);
-    } else if (user?['balance'] < int.parse(amountController.text)) {
+    } else if (int.parse(user?['balance']) < int.parse(amountController.text)) {
       LoadingScreen().hide();
       displayMessageToUser(
           'Debe colocar un monto a prestar menor al saldo disponible', context);
     } else {
       FirebaseFirestore.instance
-          .collection('Prestamos+${_pref.uid}')
+          .collection('Prestamos')
           .doc()
           .set({
         'client': clientController.text,
@@ -163,27 +170,32 @@ class _NewLoanState extends State<NewLoan> {
         'quotaMax': int.parse(quotaMaxController.text),
         'unpaid': 0,
         'paid': 0,
+        'state': false,
         'date': fcreate,
         'hour': hcreate,
-        'proxPay': newDateString
+        'proxPay': newDateString,
+        'lendr': _pref.uid,
+        'clientDni': '${clientUser!['dni']}',
+        'clientPhone': '${clientUser['phone']}',
+        'lendrName': '${user!['firstname']} ${user['middlename']} ${user['lastname']} ${user['secondlastname']}'
       });
 
       final documentSnapshot = await FirebaseFirestore.instance
-          .collection('Prestamos+${_pref.uid}')
-          .doc('General')
+          .collection('Prestamos')
+          .doc('General${_pref.uid}')
           .get();
 
       final data = documentSnapshot.data();
 
       final clientSnapshot = await FirebaseFirestore.instance
-          .collection('Clientes+${_pref.uid}')
+          .collection('Clientes')
           .doc(clientId)
           .get();
 
       final client = clientSnapshot.data();
 
       final workerSnapshot = await FirebaseFirestore.instance
-          .collection('Cobradores+${_pref.uid}')
+          .collection('Cobradores')
           .doc(workerId)
           .get();
 
@@ -194,11 +206,11 @@ class _NewLoanState extends State<NewLoan> {
       final int collectAmount = data?['collectAmount'] + loanAmount;
       final int loans = data?['loans'] + 1;
 
-      final int balance = user?['balance'] - int.parse(amountController.text);
+      final int balance = int.parse(user['balance']) - int.parse(amountController.text);
 
-      FirebaseFirestore.instance
-          .collection('Prestamos+${_pref.uid}')
-          .doc('General')
+      await FirebaseFirestore.instance
+          .collection('Prestamos')
+          .doc('General${_pref.uid}')
           .update({
         'balance': balance,
         'loans': loans,
@@ -206,8 +218,8 @@ class _NewLoanState extends State<NewLoan> {
         'collectAmount': collectAmount
       });
 
-      FirebaseFirestore.instance.collection('Users').doc(_pref.uid).update({
-        'balance': balance,
+      await FirebaseFirestore.instance.collection('Users').doc(_pref.uid).update({
+        'balance': balance.toString(),
       });
 
       final int amount_client =
@@ -215,8 +227,8 @@ class _NewLoanState extends State<NewLoan> {
       final int collect_client = client['collect'] + loanAmount;
       final int debts_client = client['debts'] + 1;
 
-      FirebaseFirestore.instance
-          .collection('Clientes+${_pref.uid}')
+      await FirebaseFirestore.instance
+          .collection('Clientes')
           .doc(clientId)
           .update({
         'amount': amount_client,
@@ -229,8 +241,8 @@ class _NewLoanState extends State<NewLoan> {
       final int collect_worker = worker['collect'] + loanAmount;
       final int loans_worker = worker['loans'] + 1;
 
-      FirebaseFirestore.instance
-          .collection('Cobradores+${_pref.uid}')
+      await FirebaseFirestore.instance
+          .collection('Cobradores')
           .doc(workerId)
           .update({
         'amount': amount_worker,
@@ -282,7 +294,7 @@ class _NewLoanState extends State<NewLoan> {
               ),
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
-                    .collection('Clientes+${_pref.uid}')
+                    .collection('Clientes')
                     .snapshots(),
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
@@ -354,7 +366,7 @@ class _NewLoanState extends State<NewLoan> {
               ),
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
-                    .collection('Cobradores+${_pref.uid}')
+                    .collection('Cobradores')
                     .snapshots(),
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>

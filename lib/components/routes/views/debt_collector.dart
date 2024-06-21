@@ -48,7 +48,7 @@ class _DebtCollectorState extends State<DebtCollector> {
     final fcreate = DateFormat('yyyy-MM-dd').format(now);
 
     final doc = await FirebaseFirestore.instance
-        .collection('Cobradores+${_pref.uid}')
+        .collection('Cobradores')
         .doc(dniController.text)
         .get();
 
@@ -79,8 +79,8 @@ class _DebtCollectorState extends State<DebtCollector> {
       displayMessageToUser(
           'Este DebtCollectore ya existe en la Base de Datos', context);
     } else {
-      FirebaseFirestore.instance
-          .collection('Cobradores+${_pref.uid}')
+    await FirebaseFirestore.instance
+          .collection('Cobradores')
           .doc(dniController.text)
           .set({
         'firstname': firstnameController.text,
@@ -101,6 +101,7 @@ class _DebtCollectorState extends State<DebtCollector> {
         'loans': 0,
         'unpaid': 0,
         'paid': 0,
+        'diff': 0
       });
       displayMessageToUser('Cobrador Guardado', context);
       LoadingScreen().hide();
@@ -278,7 +279,7 @@ class _DebtCollectorState extends State<DebtCollector> {
       builder: (context) {
         return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance
-                .collection('Cobradores+${_pref.uid}')
+                .collection('Cobradores')
                 .doc(id)
                 .snapshots(),
             builder: (context, snapshot) {
@@ -501,8 +502,8 @@ class _DebtCollectorState extends State<DebtCollector> {
                                   'Debe colocar el departamento de residencia',
                                   context);
                             } else {
-                              FirebaseFirestore.instance
-                                  .collection('Cobradores+${_pref.uid}')
+                            await FirebaseFirestore.instance
+                                  .collection('Cobradores')
                                   .doc(id)
                                   .update({
                                 'firstname': firstnameController.text,
@@ -544,8 +545,8 @@ class _DebtCollectorState extends State<DebtCollector> {
   void EliminateDebtCollector(id) async {
     LoadingScreen().show(context);
 
-    FirebaseFirestore.instance
-        .collection('Cobradores+${_pref.uid}')
+  await FirebaseFirestore.instance
+        .collection('Cobradores')
         .doc(id)
         .delete();
     displayMessageToUser('DebtCollectore Eliminado', context);
@@ -632,7 +633,6 @@ class _DebtCollectorState extends State<DebtCollector> {
                   child: TextButton(
                     onPressed: () async {
                       EliminateDebtCollector(id);
-                      Navigator.pop(context);
                     },
                     child: Text('Eliminar',
                         style: TextStyle(
@@ -656,7 +656,7 @@ class _DebtCollectorState extends State<DebtCollector> {
     final collections = GetCollectionsLoan();
 
     return StreamBuilder<QuerySnapshot>(
-        stream: collections.getCollections(_pref.uid, 'Cobradores'),
+        stream: collections.getCollections('Cobradores', _pref.uid),
         builder: (context, snapshot) {
           final service = snapshot.data?.docs;
 

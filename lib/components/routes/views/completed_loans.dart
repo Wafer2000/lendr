@@ -26,21 +26,13 @@ class _CompletedLoansState extends State<CompletedLoans> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Historial',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
-            ),
-            icon: Icon(
-              Icons.list,
-              color: Theme.of(context).primaryColor,
-            ),
+          return Dialog(
             backgroundColor: Theme.of(context).colorScheme.surface,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            content: StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
+                    .collection('Prestamos')
                     .doc(id)
                     .collection('Historial')
                     .orderBy('date', descending: true)
@@ -72,284 +64,122 @@ class _CompletedLoansState extends State<CompletedLoans> {
                       ),
                     );
                   }
+
                   return Scaffold(
                     backgroundColor: Colors.transparent,
-                    body: ListView.builder(
-                      itemCount: service?.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot document = service![index];
-                        Map<String, dynamic> data =
-                            document.data() as Map<String, dynamic>;
-
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                          child: Container(
-                            width: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Theme.of(context).colorScheme.surface,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? Colors.grey.withOpacity(0.7)
-                                      : Colors.black.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 10,
-                                  offset: const Offset(
-                                      0, 3), // changes position of shadow
+                    body: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Historial de los Abonos',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(
+                                  label: Text(
+                                    'ID',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Cliente',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Cobrador',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Abono',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Deuda Faltante',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Fecha',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Hora',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Estado',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 20, 0, 20),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Cliente: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['client']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Prestamo: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['amount']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Abono: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['cashPayment']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Deuda Faltante: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            data['totalDebt'] <= 0
-                                                ? '0'
-                                                : '${data['totalDebt']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Text(
-                                          'Proximo Cobro: ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                          textAlign:
-                                              TextAlign.left, // Add this line
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize:
-                                          MainAxisSize.min, // Add this line
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${data['proxPay']}',
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                            textAlign:
-                                                TextAlign.left, // Add this line
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Divider(
-                                    height: 10, // The height of the divider
-                                    thickness:
-                                        1, // The thickness of the divider
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? MyColor.black().color
-                                        : MyColor.white()
-                                            .color, // The color of the divider
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Hora de Abono: ',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                      Text(
-                                        '${data['hour']}',
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Fecha de Abono: ',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                      Text(
-                                        '${data['date']}',
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                              rows: service!.asMap().entries.map((entry) {
+                                Map<String, dynamic> data =
+                                    entry.value.data() as Map<String, dynamic>;
+                                String docId = entry.value.id;
+                                return DataRow(
+                                  cells: <DataCell>[
+                                    DataCell(Text('${entry.key + 1}')),
+                                    DataCell(Text('${data['client']}')),
+                                    DataCell(Text('${data['worker']}')),
+                                    DataCell(Text(NumberFormat.currency(
+                                            locale: 'es', symbol: '\$')
+                                        .format(data['cashPayment']))),
+                                    DataCell(Text(NumberFormat.currency(
+                                            locale: 'es', symbol: '\$')
+                                        .format(data['totalDebt']))),
+                                    DataCell(Text('${data['date']}')),
+                                    DataCell(Text('${data['hour']}')),
+                                    DataCell(data['cashPayment'] == 0
+                                        ? Text('En mora')
+                                        : Text('Pago')),
+                                  ],
+                                );
+                              }).toList(),
                             ),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   );
                 }),
@@ -362,15 +192,11 @@ class _CompletedLoansState extends State<CompletedLoans> {
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: const Center(child: Text('C o b r o s  C o m p l e t a d o s')),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.pushNamed(context, NewLoan.routname);
-              },
-              tooltip: 'Add',
-              alignment: Alignment.center,
+          title:
+              const Center(child: Text('C o b r o s  C o m p l e t a d o s')),
+          actions: const [
+            SizedBox(
+              width: 56,
             ),
           ],
           backgroundColor: Theme.of(context).brightness == Brightness.light
@@ -383,8 +209,8 @@ class _CompletedLoansState extends State<CompletedLoans> {
           children: [
             StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('Prestamos+${_pref.uid}')
-                  .doc('General')
+                  .collection('Prestamos')
+                  .doc('General${_pref.uid}')
                   .snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -424,6 +250,45 @@ class _CompletedLoansState extends State<CompletedLoans> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Saldo Disponible: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? MyColor.black().color
+                                        : MyColor.iron().color,
+                                  ),
+                                ),
+                                Text(
+                                  NumberFormat.currency(
+                                          locale: 'es', symbol: '\$')
+                                      .format(data['balance']),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? MyColor.black().color
+                                        : MyColor.iron().color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(
+                            height: 10, // The height of the divider
+                            thickness: 1, // The thickness of the divider
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? MyColor.black().color
+                                    : MyColor.iron().color,
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: Row(
@@ -532,8 +397,8 @@ class _CompletedLoansState extends State<CompletedLoans> {
                             ),
                           ),
                           Divider(
-                            height: 10, // The height of the divider
-                            thickness: 1, // The thickness of the divider
+                            height: 10,
+                            thickness: 1,
                             color:
                                 Theme.of(context).brightness == Brightness.light
                                     ? MyColor.black().color
@@ -584,8 +449,9 @@ class _CompletedLoansState extends State<CompletedLoans> {
             ),
             StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
-                    .where('state', isEqualTo: true)
+                    .collection('Prestamos')
+                    .where('user', isEqualTo: _pref.uid)
+                    .where('state', isEqualTo: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -632,7 +498,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
                         final now = DateTime.now();
                         final fhoy = DateFormat('yyyy-MM-dd').format(now);
 
-                        if (fhoy != data['proxPay']) {
+                        if (fhoy == data['proxPay']) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(10, 5, 10, 15),
                             child: Container(
@@ -729,7 +595,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
                                                                   locale: 'es',
                                                                   symbol: '\$')
                                                               .format(data[
-                                                                      'loanAmount']),
+                                                                  'loanAmount']),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -778,7 +644,7 @@ class _CompletedLoansState extends State<CompletedLoans> {
                                                                   locale: 'es',
                                                                   symbol: '\$')
                                                               .format(data[
-                                                                      'quotaNumber']),
+                                                                  'quotaNumber']),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -822,7 +688,8 @@ class _CompletedLoansState extends State<CompletedLoans> {
                                                           ),
                                                         ),
                                                         Text(
-                                                          data['quotaMax'].toString(),
+                                                          data['quotaMax']
+                                                              .toString(),
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)
@@ -867,6 +734,94 @@ class _CompletedLoansState extends State<CompletedLoans> {
                                                         ),
                                                         Text(
                                                           '${data['percentage']}%',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 5),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Abonos Pagados: ',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${data['paid'].toString()}',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 5),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Abonos en Mora: ',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 15,
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .light
+                                                                ? MyColor
+                                                                        .black()
+                                                                    .color
+                                                                : MyColor.iron()
+                                                                    .color,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${data['unpaid'].toString()}',
                                                           style: TextStyle(
                                                             fontSize: 15,
                                                             color: Theme.of(context)

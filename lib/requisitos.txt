@@ -1,0 +1,31 @@
+Saludos,
+Implementar todas las correcciones, los tiempos de respuestas son todavia 
+demasiado lentos, recuerden que si no funciona entonces no les voy a revisar 
+lo que les voy a solicitar a continuación:
+
+Reportes diarios, semanal, mensual, bimestral, trimestral, semestral y anual de:
+
+
+
+(1) - Cantidad de deuda así: nombre deudor, cedula, telefono, nombre 
+del que prestó, nombre del cobrador, cantidad de deudas actuales, 
+valor de las deudas actuales, tiempo que le falta a la deuda de 
+mayor tiempo para ser saldada, # de veces que ha incumplido los pagos.
+
+(2 - Hecho) - Reporte por cobrador, debe mostrar a quienes les debe cobrar, cuantas 
+cuotas faltan, cuántas veces cada cliente le ha quedado mal en las deudas 
+actuales, cuánto dinero tiene en la calle, cuál será la ganancia al cobrar 
+todas esas deudas.
+
+(3 - Hecho) - Reporte de ganancias discriminada por cada cobrador, ordenadas 
+del que genera más ganancias al que menos.
+
+(4 - Hecho) - Clientes que han quedado mal en su pago (nombre, cédula, 
+teléfono, cantidad de veces que ha quedado mal), ordenar del 
+que más queda mal al que menos queda mal.
+
+(5 - Hecho) - Reporte por cliente del cumplimiento de sus obligaciones, la 
+cantidad de veces que ha quedado mal, mostrar porcentaje de confiabilidad.
+
+OJO que si no funciona lo que deben presentar correctamente entonces no les 
+voy a revisar lo anterior y lo anterior es lo que determina sus notas.

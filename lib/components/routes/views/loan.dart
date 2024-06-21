@@ -38,7 +38,7 @@ class _HomeState extends State<Loan> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
+                    .collection('Prestamos')
                     .doc(id)
                     .collection('Historial')
                     .orderBy('date', descending: true)
@@ -162,7 +162,7 @@ class _HomeState extends State<Loan> {
                               rows: service!.asMap().entries.map((entry) {
                                 Map<String, dynamic> data =
                                     entry.value.data() as Map<String, dynamic>;
-                                String docId = entry.value.id;
+                                //String docId = entry.value.id;
                                 return DataRow(
                                   cells: <DataCell>[
                                     DataCell(Text('${entry.key + 1}')),
@@ -268,7 +268,7 @@ class _HomeState extends State<Loan> {
 
                       final DocumentSnapshot documentSnapshot =
                           await FirebaseFirestore.instance
-                              .collection('Prestamos+${_pref.uid}')
+                              .collection('Prestamos')
                               .doc(id)
                               .get();
 
@@ -318,7 +318,7 @@ class _HomeState extends State<Loan> {
 
                       final user = userSnapshot.data();
 
-                      final int balance = user?['balance'] +
+                      final int balance = int.parse(user?['balance']) +
                           int.parse(paymentCreditController.text);
 
                       final int paidPrestamo = data['paid'] + 1;
@@ -337,8 +337,8 @@ class _HomeState extends State<Loan> {
                           int.parse(paymentCreditController.text);
 
                       final generalSnapshot = await FirebaseFirestore.instance
-                          .collection('Prestamos+${_pref.uid}')
-                          .doc('General')
+                          .collection('Prestamos')
+                          .doc('General${_pref.uid}')
                           .get();
 
                       if (int.parse(paymentCreditController.text) >=
@@ -356,12 +356,12 @@ class _HomeState extends State<Loan> {
 
                           final clientSnapshot = await FirebaseFirestore
                               .instance
-                              .collection('Clientes+${_pref.uid}')
+                              .collection('Clientes')
                               .doc(data['clientId'])
                               .get();
 
                           final workSnapshot = await FirebaseFirestore.instance
-                              .collection('Cobradores+${_pref.uid}')
+                              .collection('Cobradores')
                               .doc(data['workerId'])
                               .get();
 
@@ -372,7 +372,7 @@ class _HomeState extends State<Loan> {
                             final cli =
                                 clientSnapshot.data() as Map<String, dynamic>;
 
-                            final int collect = cli['collect'] -
+                            final int collect = loanAmount -
                                 int.parse(paymentCreditController.text);
                             final int debts = cli['debts'] - 1;
                             final int paidCliente = cli['paid'] + 1;
@@ -386,9 +386,9 @@ class _HomeState extends State<Loan> {
                               if (loanAmount == 0) {
                                 final int quota = data['quotaMax'] - 1;
                                 final int loans = doc['loans'] - 1;
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
-                                    .doc('General')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
+                                    .doc('General${_pref.uid}')
                                     .update({
                                   'balance': balance,
                                   'loans': loans,
@@ -397,25 +397,26 @@ class _HomeState extends State<Loan> {
                                   'paid': paidGeneral
                                 });
 
-                                FirebaseFirestore.instance
+                                await FirebaseFirestore.instance
                                     .collection('Users')
                                     .doc(_pref.uid)
                                     .update({
-                                  'balance': balance,
+                                  'balance': balance.toString(),
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
                                     .doc(id)
                                     .update({
                                   'loanAmount': loanAmount,
                                   'proxPay': newDateString,
                                   'quotaMax': quota,
-                                  'paid': paidPrestamo
+                                  'paid': paidPrestamo,
+                                  'state': true
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Clientes+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Clientes')
                                     .doc(data['clientId'])
                                     .update({
                                   'collect': collect,
@@ -423,8 +424,8 @@ class _HomeState extends State<Loan> {
                                   'paid': paidCliente
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Cobradores+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Cobradores')
                                     .doc(data['workerId'])
                                     .update({
                                   'collect': collect,
@@ -432,8 +433,8 @@ class _HomeState extends State<Loan> {
                                   'paid': paidCobrador,
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
                                     .doc(id)
                                     .collection('Historial')
                                     .doc()
@@ -454,10 +455,28 @@ class _HomeState extends State<Loan> {
                                   'date': fcreate,
                                   'hour': hcreate,
                                 });
+                                await FirebaseFirestore.instance
+                                    .collection('GananciasHistorial')
+                                    .doc()
+                                    .set({
+                                  'client': data['client'],
+                                  'clientId': data['clientId'],
+                                  'worker': data['worker'],
+                                  'workerId': data['workerId'],
+                                  'loanId': id,
+                                  'amount': data['amount'], //Esta
+                                  'cashPayment':
+                                      int.parse(paymentCreditController.text),
+                                  'totalDebt': collect,
+                                  'proxPay': newDateString,
+                                  'date': fcreate,
+                                  'hour': hcreate,
+                                  'lendr': _pref.uid
+                                });
 
                                 final gananciasSnapshot =
                                     await FirebaseFirestore.instance
-                                        .collection('Ganancias+${_pref.uid}')
+                                        .collection('Ganancias')
                                         .doc(fcreate)
                                         .get();
 
@@ -468,28 +487,29 @@ class _HomeState extends State<Loan> {
                                   final int ganancias = gan['profits'] +
                                       int.parse(paymentCreditController.text);
 
-                                  FirebaseFirestore.instance
-                                      .collection('Ganancias+${_pref.uid}')
+                                  await FirebaseFirestore.instance
+                                      .collection('Ganancias')
                                       .doc(fcreate)
                                       .update({
                                     'profits': ganancias,
                                     'date': fcreate,
                                   });
                                 } else {
-                                  FirebaseFirestore.instance
-                                      .collection('Ganancias+${_pref.uid}')
+                                  await FirebaseFirestore.instance
+                                      .collection('Ganancias')
                                       .doc(fcreate)
-                                      .update({
+                                      .set({
                                     'profits':
                                         int.parse(paymentCreditController.text),
                                     'date': fcreate,
+                                    'lendr': _pref.uid
                                   });
                                 }
                               } else {
                                 final int quota = data['quotaMax'] - 1;
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
-                                    .doc('General')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
+                                    .doc('General${_pref.uid}')
                                     .update({
                                   'balance': balance,
                                   'collectAmount': collectAmount,
@@ -497,16 +517,16 @@ class _HomeState extends State<Loan> {
                                   'paid': paidGeneral
                                 });
 
-                                FirebaseFirestore.instance
+                                await FirebaseFirestore.instance
                                     .collection('Users')
                                     .doc(_pref.uid)
                                     .update({
-                                  'balance': balance,
+                                  'balance': balance.toString(),
                                   'quotaMax': quota
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
                                     .doc(id)
                                     .update({
                                   'loanAmount': loanAmount,
@@ -515,24 +535,24 @@ class _HomeState extends State<Loan> {
                                   'paid': paidPrestamo
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Clientes+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Clientes')
                                     .doc(data['clientId'])
                                     .update({
                                   'collect': collect,
                                   'paid': paidCliente
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Cobradores+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Cobradores')
                                     .doc(data['workerId'])
                                     .update({
                                   'collect': collect,
                                   'paid': paidCobrador,
                                 });
 
-                                FirebaseFirestore.instance
-                                    .collection('Prestamos+${_pref.uid}')
+                                await FirebaseFirestore.instance
+                                    .collection('Prestamos')
                                     .doc(id)
                                     .collection('Historial')
                                     .doc()
@@ -550,10 +570,31 @@ class _HomeState extends State<Loan> {
                                   'date': fcreate,
                                   'hour': hcreate,
                                 });
+                                await FirebaseFirestore.instance
+                                    .collection('GananciasHistorial')
+                                    .doc()
+                                    .set({
+                                  'client': data['client'],
+                                  'clientId': data['clientId'],
+                                  'worker': data['worker'],
+                                  'workerId': data['workerId'],
+                                  'loanId': id,
+                                  'amount': data['amount'], //Esta
+                                  'address': data['address'], //Esta
+                                  'email': data['email'], //Esta
+                                  'phone': data['phone'], //Esta
+                                  'cashPayment':
+                                      int.parse(paymentCreditController.text),
+                                  'totalDebt': collect,
+                                  'proxPay': newDateString,
+                                  'date': fcreate,
+                                  'hour': hcreate,
+                                  'lendr': _pref.uid
+                                });
 
                                 final gananciasSnapshot =
                                     await FirebaseFirestore.instance
-                                        .collection('Ganancias+${_pref.uid}')
+                                        .collection('Ganancias')
                                         .doc(fcreate)
                                         .get();
 
@@ -564,21 +605,22 @@ class _HomeState extends State<Loan> {
                                   final int ganancias = gan['profits'] +
                                       int.parse(paymentCreditController.text);
 
-                                  FirebaseFirestore.instance
-                                      .collection('Ganancias+${_pref.uid}')
+                                  await FirebaseFirestore.instance
+                                      .collection('Ganancias')
                                       .doc(fcreate)
                                       .update({
                                     'profits': ganancias,
                                     'date': fcreate,
                                   });
                                 } else {
-                                  FirebaseFirestore.instance
-                                      .collection('Ganancias+${_pref.uid}')
+                                  await FirebaseFirestore.instance
+                                      .collection('Ganancias')
                                       .doc(fcreate)
-                                      .update({
+                                      .set({
                                     'profits':
                                         int.parse(paymentCreditController.text),
                                     'date': fcreate,
+                                    'lendr': _pref.uid
                                   });
                                 }
                               }
@@ -625,10 +667,8 @@ class _HomeState extends State<Loan> {
   void not_payment_credit(id) async {
     LoadingScreen().show(context);
 
-    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .collection('Prestamos+${_pref.uid}')
-        .doc(id)
-        .get();
+    final DocumentSnapshot documentSnapshot =
+        await FirebaseFirestore.instance.collection('Prestamos').doc(id).get();
 
     final data = documentSnapshot.data() as Map<String, dynamic>;
 
@@ -680,8 +720,8 @@ class _HomeState extends State<Loan> {
     final int loanAmount = data['loanAmount'] - 0;
 
     final generalSnapshot = await FirebaseFirestore.instance
-        .collection('Prestamos+${_pref.uid}')
-        .doc('General')
+        .collection('Prestamos')
+        .doc('General${_pref.uid}')
         .get();
 
     if (generalSnapshot.exists) {
@@ -693,12 +733,12 @@ class _HomeState extends State<Loan> {
       final int earnings = doc['earnings'] + 0;
 
       final clientSnapshot = await FirebaseFirestore.instance
-          .collection('Clientes+${_pref.uid}')
+          .collection('Clientes')
           .doc(data['clientId'])
           .get();
 
       final workSnapshot = await FirebaseFirestore.instance
-          .collection('Cobradores+${_pref.uid}')
+          .collection('Cobradores')
           .doc(data['workerId'])
           .get();
 
@@ -715,9 +755,9 @@ class _HomeState extends State<Loan> {
         if (loanAmount == 0) {
           final int loans = doc['loans'] - 1;
           final int quota = data['quotaMax'] - 1;
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
-              .doc('General')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
+              .doc('General${_pref.uid}')
               .update({
             'loans': loans,
             'collectAmount': collectAmount,
@@ -725,8 +765,8 @@ class _HomeState extends State<Loan> {
             'unpaid': unpaidGeneral
           });
 
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
               .doc(id)
               .update({
             'loanAmount': loanAmount,
@@ -735,8 +775,8 @@ class _HomeState extends State<Loan> {
             'unpaid': unpaidPrestamo
           });
 
-          FirebaseFirestore.instance
-              .collection('Clientes+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Clientes')
               .doc(data['clientId'])
               .update({
             'collect': collect,
@@ -744,8 +784,8 @@ class _HomeState extends State<Loan> {
             'unpaid': unpaidCliente
           });
 
-          FirebaseFirestore.instance
-              .collection('Cobradores+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Cobradores')
               .doc(data['workerId'])
               .update({
             'collect': collect,
@@ -753,8 +793,8 @@ class _HomeState extends State<Loan> {
             'unpaid': unpaidCobrador,
           });
 
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
               .doc(id)
               .collection('Historial')
               .doc()
@@ -776,22 +816,22 @@ class _HomeState extends State<Loan> {
           });
         } else {
           final int quota = data['quotaMax'] - 1;
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
-              .doc('General')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
+              .doc('General${_pref.uid}')
               .update({
             'collectAmount': collectAmount,
             'earnings': earnings,
             'unpaid': unpaidGeneral
           });
 
-          FirebaseFirestore.instance
+          await FirebaseFirestore.instance
               .collection('Users')
               .doc(_pref.uid)
               .update({'quotaMax': quota});
 
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
               .doc(id)
               .update({
             'loanAmount': loanAmount,
@@ -800,21 +840,21 @@ class _HomeState extends State<Loan> {
             'unpaid': unpaidPrestamo
           });
 
-          FirebaseFirestore.instance
-              .collection('Clientes+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Clientes')
               .doc(data['clientId'])
               .update({'collect': collect, 'unpaid': unpaidCliente});
 
-          FirebaseFirestore.instance
-              .collection('Cobradores+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Cobradores')
               .doc(data['workerId'])
               .update({
             'collect': collect,
             'unpaid': unpaidCobrador,
           });
 
-          FirebaseFirestore.instance
-              .collection('Prestamos+${_pref.uid}')
+          await FirebaseFirestore.instance
+              .collection('Prestamos')
               .doc(id)
               .collection('Historial')
               .doc()
@@ -871,8 +911,8 @@ class _HomeState extends State<Loan> {
           children: [
             StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('Prestamos+${_pref.uid}')
-                  .doc('General')
+                  .collection('Prestamos')
+                  .doc('General${_pref.uid}')
                   .snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -1111,7 +1151,9 @@ class _HomeState extends State<Loan> {
             ),
             StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('Prestamos+${_pref.uid}')
+                    .collection('Prestamos')
+                    .where('lendr', isEqualTo: _pref.uid)
+                    .where('state', isEqualTo: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -1174,384 +1216,380 @@ class _HomeState extends State<Loan> {
                                 padding:
                                     const EdgeInsets.fromLTRB(10, 0, 10, 10),
                                 child: Column(
-                                  children: [
-                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(top: 10),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Flexible(
+                                            flex: 1,
+                                            child: Text(
+                                              data['client'],
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27,
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.light
+                                                    ? MyColor.black().color
+                                                    : MyColor.iron().color,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Divider(
+                                      height: 10,
+                                      thickness: 1,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? MyColor.black().color
+                                          : MyColor.iron().color,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 10),
-                                          child: Row(
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                                MainAxisAlignment.start,
                                             children: [
-                                              Flexible(
-                                                flex: 1,
-                                                child: Text(
-                                                  data['client'],
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 27,
-                                                    color: Theme.of(context)
-                                                                .brightness ==
-                                                            Brightness.light
-                                                        ? MyColor.black().color
-                                                        : MyColor.iron().color,
-                                                  ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    Text(
+                                                      'Dinero por Cobrar: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      NumberFormat.currency(
+                                                              locale: 'es',
+                                                              symbol: '\$')
+                                                          .format(data[
+                                                              'loanAmount']),
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      'Pago por Cuota: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                      textAlign:
+                                                          TextAlign.left,
+                                                    ),
+                                                    Text(
+                                                      NumberFormat.currency(
+                                                              locale: 'es',
+                                                              symbol: '\$')
+                                                          .format(data[
+                                                              'quotaNumber']),
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    Text(
+                                                      'Numero de Cuotas: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      data['quotaMax']
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    Text(
+                                                      'Porcentaje: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${data['percentage']}%',
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    Text(
+                                                      'Abonos Pagados: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${data['paid'].toString()}',
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.only(
+                                                        top: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    Text(
+                                                      'Abonos en Mora: ',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${data['unpaid'].toString()}',
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness
+                                                                    .light
+                                                            ? MyColor
+                                                                    .black()
+                                                                .color
+                                                            : MyColor.iron()
+                                                                .color,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ],
                                           ),
                                         ),
-                                        Divider(
-                                          height: 10,
-                                          thickness: 1,
-                                          color: Theme.of(context).brightness ==
-                                                  Brightness.light
-                                              ? MyColor.black().color
-                                              : MyColor.iron().color,
-                                        ),
-                                        Row(
+                                        Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.center,
                                           children: [
-                                            Container(
-                                              alignment: Alignment.centerLeft,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Dinero por Cobrar: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          NumberFormat.currency(
-                                                                  locale: 'es',
-                                                                  symbol: '\$')
-                                                              .format(data[
-                                                                  'loanAmount']),
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.end,
-                                                      children: [
-                                                        Text(
-                                                          'Pago por Cuota: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                        ),
-                                                        Text(
-                                                          NumberFormat.currency(
-                                                                  locale: 'es',
-                                                                  symbol: '\$')
-                                                              .format(data[
-                                                                  'quotaNumber']),
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Numero de Cuotas: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          data['quotaMax']
-                                                              .toString(),
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Porcentaje: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          '${data['percentage']}%',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Abonos Pagados: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          '${data['paid'].toString()}',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Abonos en Mora: ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          '${data['unpaid'].toString()}',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Theme.of(context)
-                                                                        .brightness ==
-                                                                    Brightness
-                                                                        .light
-                                                                ? MyColor
-                                                                        .black()
-                                                                    .color
-                                                                : MyColor.iron()
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                            IconButton(
+                                              icon: const Icon(Icons.check),
+                                              onPressed: () {
+                                                new_payment_credit(docID);
+                                              },
+                                              iconSize: 35,
+                                              tooltip: 'Abono',
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.light
+                                                  ? MyColor.black().color
+                                                  : MyColor.iron().color,
+                                              alignment: Alignment.center,
                                             ),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(Icons.check),
-                                                  onPressed: () {
-                                                    new_payment_credit(docID);
-                                                  },
-                                                  iconSize: 35,
-                                                  tooltip: 'Abono',
-                                                  color: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.light
-                                                      ? MyColor.black().color
-                                                      : MyColor.iron().color,
-                                                  alignment: Alignment.center,
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.close),
-                                                  onPressed: () {
-                                                    not_payment_credit(docID);
-                                                  },
-                                                  iconSize: 35,
-                                                  tooltip: 'Abono',
-                                                  color: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.light
-                                                      ? MyColor.black().color
-                                                      : MyColor.iron().color,
-                                                  alignment: Alignment.center,
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                      Icons.list_sharp),
-                                                  onPressed: () {
-                                                    view_history(docID);
-                                                  },
-                                                  iconSize: 35,
-                                                  tooltip: 'Histrial',
-                                                  color: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.light
-                                                      ? MyColor.black().color
-                                                      : MyColor.iron().color,
-                                                  alignment: Alignment.center,
-                                                ),
-                                              ],
+                                            IconButton(
+                                              icon: const Icon(Icons.close),
+                                              onPressed: () {
+                                                not_payment_credit(docID);
+                                              },
+                                              iconSize: 35,
+                                              tooltip: 'Abono',
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.light
+                                                  ? MyColor.black().color
+                                                  : MyColor.iron().color,
+                                              alignment: Alignment.center,
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                  Icons.list_sharp),
+                                              onPressed: () {
+                                                view_history(docID);
+                                              },
+                                              iconSize: 35,
+                                              tooltip: 'Histrial',
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.light
+                                                  ? MyColor.black().color
+                                                  : MyColor.iron().color,
+                                              alignment: Alignment.center,
                                             ),
                                           ],
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ],
